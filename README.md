@@ -67,6 +67,8 @@ Exemplo:
 ```bash
 git clone LINK_DO_REPOSITORIO
 cd NOME_DA_PASTA
+python3 -m venv venv
+./venv/Scripts/activate
 pip install -r requirements.txt
 python main.py
 ```
