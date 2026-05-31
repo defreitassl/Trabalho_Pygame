@@ -1,15 +1,13 @@
-# Nome do Jogo
+# BIG BANG
 
 Projeto final da disciplina de Introdução a Algoritmos/Programação, desenvolvido com Python e Pygame.
 
-Este repositório é um template para os grupos da disciplina. A proposta é começar com uma base funcional e evoluir o jogo ao longo do semestre.
-
 ## Integrantes do grupo
 
-- Nome do integrante 1
-- Nome do integrante 2
-- Nome do integrante 3
-- Nome do integrante 4
+- [Evelyn Costa](https://github.com/Evycostzocn)
+- [Douglas Freitas](https://github.com/defreitassl)
+- [João Pedro Alvarenga](https://github.com/joaopedro003)
+- [Eduardo Pêgo](https://github.com/Eduardo-Pegoz) 
 
 ## Estrutura do projeto
 
@@ -22,51 +20,42 @@ Este repositório é um template para os grupos da disciplina. A proposta é com
 
 ## Descrição do jogo
 
-Descreva brevemente a ideia principal do jogo.
-
-Exemplo:
-
-> O jogo consiste em controlar um personagem que deve coletar moedas e evitar obstáculos. O jogador ganha pontos ao coletar itens e perde vidas ao colidir com obstáculos. A partida termina quando o tempo acaba ou quando o jogador perde todas as vidas.
+O jogo consiste em controlar um dinossauro que deve coletar pedaços de carne e desviar dos meteoros para sobreviver. O jogo possui uma relação direta entre a quantidade de carnes coletadas e o tempo de sobrevivência, fazendo com que some mais pontos. Caso ele colete uma carne podre ele perde pontos coletou pegando carnes boas.
 
 ## Objetivo do jogador
 
-Explique o que o jogador precisa fazer para vencer ou avançar no jogo.
-
-Exemplo:
-
-> O objetivo é coletar a maior quantidade possível de itens antes que o tempo acabe, evitando colisões com os obstáculos.
+O jogador que coletar o máximo de carnes boas possíveis ganha a partida independente do tempo que ele sobreviver.
 
 ## Regras do jogo
 
-Liste as principais regras do jogo.
+Principais regras do jogo.
 
-Exemplo:
-
-- O jogador se movimenta usando as setas do teclado.
-- Cada item coletado aumenta a pontuação.
-- Colidir com um obstáculo reduz a quantidade de vidas.
-- A partida termina quando o jogador perde todas as vidas ou quando o tempo acaba.
+- O jogador se movimenta usando as setas do teclado e as teclas WASD.
+- Cada pedqaço de carne coletada aumenta a pontuação.
+- Colidir com um meteoro faz com que um jogador perca.
+- A partida termina quando os dois jogadores morrem.
 
 ## Controles
 
-Informe as teclas ou comandos utilizados no jogo.
-
-Exemplo:
+Comando utilizados para jogar
 
 - Seta para cima: mover para cima
 - Seta para baixo: mover para baixo
 - Seta para esquerda: mover para esquerda
 - Seta para direita: mover para direita
-- Espaço: realizar ação
-- ESC: sair do jogo
+- W: mover para cima
+- S: mover para baixo
+- A: mover para esquerda
+- D: mover para direita
+
 
 ## Como executar o projeto
 
 ### 1. Clonar o repositório
 
 ```bash
-git clone LINK_DO_REPOSITORIO
-cd NOME_DA_PASTA
+git clone https://github.com/defreitassl/Trabalho_Pygame.git
+cd Trabalho_Pygame
 pip install -r requirements.txt
 python main.py
 ```
