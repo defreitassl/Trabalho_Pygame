@@ -1,22 +1,25 @@
 import pygame
 
+from src.menu import ALTURA_TELA, LARGURA_TELA, executar_menu
+
 
 def executar_jogo():
-    """Executa o loop principal do jogo e controla estado, colisões e pontuação."""
+    """Abre a janela do jogo e chama o menu inicial."""
     pygame.init()
 
-    tela = pygame.display.set_mode((800, 400))
+    tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
     pygame.display.set_caption("BIG BANG")
-    relogio = pygame.time.Clock()
+
     executando = True
 
     while executando:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                executando = False
+        opcao = executar_menu(tela)
+        print(f"Opcao escolhida: {opcao}")
 
-        tela.fill((0, 0, 0))
-        pygame.display.update()
-        relogio.tick(60)
+        if opcao == "sair":
+            executando = False
+        else:
+            print("A logica do jogo ainda sera integrada aqui.")
+            executando = False
 
     pygame.quit()
