@@ -1,5 +1,6 @@
 import pygame
 import src.funcoes as fn
+import random
 from sys import exit
 
 pygame.init()
@@ -28,8 +29,6 @@ carne = pygame.transform.scale(carne, (50, 50))
 
 carne_rect = carne.get_rect(center=(600, 200))
 
-carne_coletada = False
-
 velocidade = 5
 
 while True:
@@ -48,11 +47,14 @@ while True:
 
     screen.blit(dino, dino_rect)
 
+
     if not carne_coletada:
         screen.blit(carne, carne_rect)
 
     if not carne_coletada and dino_rect.colliderect(carne_rect):
-        carne_coletada = True
+        x = random.randint(0, 1000)
+        y = random.randint(0, 700)
+        carne_rect.center = (x, y)
         print("CATOU A CARNE!")
 
     pygame.display.update()
