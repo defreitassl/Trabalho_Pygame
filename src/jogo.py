@@ -12,11 +12,3 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-
-def executar_jogo():
-    """Executa o loop principal do jogo e controla estado, colisões e pontuação."""
-    pygame.init()
-    
-
-
-    pygame.quit()
