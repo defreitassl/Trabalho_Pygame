@@ -1,6 +1,3 @@
-def calcular_pontos(pontos_atual, pontos_ganhos):
-    """Soma os pontos ganhos à pontuação atual."""
-    return pontos_atual + pontos_ganhos
 
 
 def tomar_dano(vida_atual, dano):
