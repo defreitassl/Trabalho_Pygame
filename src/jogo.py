@@ -48,10 +48,10 @@ while True:
     screen.blit(dino, dino_rect)
 
 
-    if not carne_coletada:
-        screen.blit(carne, carne_rect)
+    
+    screen.blit(carne, carne_rect)
 
-    if not carne_coletada and dino_rect.colliderect(carne_rect):
+    if dino_rect.colliderect(carne_rect):
         x = random.randint(0, 1000)
         y = random.randint(0, 700)
         carne_rect.center = (x, y)
