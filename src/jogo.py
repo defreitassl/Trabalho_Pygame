@@ -1,10 +1,51 @@
+import random
+
 import pygame
 
+import src.funcoes as fn
 from src.menu import ALTURA_TELA, LARGURA_TELA, executar_menu
 
 
+def executar_loop_jogo(tela):
+    """Executa a tela jogavel integrada ao menu."""
+    clock = pygame.time.Clock()
+
+    dino = pygame.image.load(
+        "assets/imagens/dino sprites/Run (2).png"
+    ).convert_alpha()
+    dino = pygame.transform.scale(dino, (100, 80))
+    dino_rect = dino.get_rect(center=(400, 200))
+
+    carne = pygame.image.load("assets/imagens/MeatUI2.png").convert_alpha()
+    carne = pygame.transform.scale(carne, (50, 50))
+    carne_rect = carne.get_rect(center=(600, 200))
+
+    velocidade = 5
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "sair"
+
+        teclas = pygame.key.get_pressed()
+        fn.mover_jogador1(teclas, dino_rect, velocidade)
+
+        tela.fill((30, 30, 30))
+        tela.blit(dino, dino_rect)
+        tela.blit(carne, carne_rect)
+
+        if dino_rect.colliderect(carne_rect):
+            x = random.randint(25, LARGURA_TELA - 25)
+            y = random.randint(25, ALTURA_TELA - 25)
+            carne_rect.center = (x, y)
+            print("CATOU A CARNE!")
+
+        pygame.display.update()
+        clock.tick(60)
+
+
 def executar_jogo():
-    """Abre a janela do jogo e chama o menu inicial."""
+    """Abre a janela do jogo, chama o menu inicial e inicia a partida."""
     pygame.init()
 
     tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
@@ -19,7 +60,8 @@ def executar_jogo():
         if opcao == "sair":
             executando = False
         else:
-            print("A logica do jogo ainda sera integrada aqui.")
-            executando = False
+            resultado = executar_loop_jogo(tela)
+            if resultado == "sair":
+                executando = False
 
     pygame.quit()
