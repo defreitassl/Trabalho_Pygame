@@ -1,5 +1,3 @@
-import random
-
 import pygame
 
 import src.funcoes as fn
@@ -47,16 +45,13 @@ def executar_loop_jogo(tela):
         tela.blit(carne, carne_rect)
         tela.blit(texto_pontos, (20,20))
         
-        if dino_rect.colliderect(carne_rect):
+        if fn.verificar_colisao(dino_rect, carne_rect):
         
             pontos = fn.calcular_pontos(
                 pontos, 10
             )
 
-            x = random.randint(25, LARGURA_TELA - 25)
-            y = random.randint(25, ALTURA_TELA - 25)
-
-            carne_rect.center = (x, y) # Gera posição aleatória para a carne
+            carne_rect.center = fn.gerar_posicao_aleatoria() # Gera posição aleatória para a carne
 
             print(f"Pontos: {pontos}")
 

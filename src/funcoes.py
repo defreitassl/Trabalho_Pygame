@@ -1,5 +1,14 @@
 import pygame
+import random
+from src.menu import ALTURA_TELA, LARGURA_TELA
 
+def gerar_posicao_aleatoria():
+    """Retorna uma posição aleatória dentro dos limites da tela."""
+    
+    x = random.randint(25, LARGURA_TELA - 25)
+    y = random.randint(25, ALTURA_TELA - 25)
+
+    return x, y
 
 def calcular_pontos(pontos_atual, pontos_ganhos):
     """Soma os pontos ganhos à pontuação atual."""
