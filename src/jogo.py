@@ -20,7 +20,13 @@ def executar_loop_jogo(tela):
     carne = pygame.transform.scale(carne, (50, 50))
     carne_rect = carne.get_rect(center=(600, 200))
 
+    fonte = pygame.font.Font(
+        "assets/fontes/fonte_pixel.ttf",
+        36
+    )
+
     velocidade = 5
+    pontos = 0
 
     while True:
         for event in pygame.event.get():
@@ -31,14 +37,28 @@ def executar_loop_jogo(tela):
         fn.mover_jogador1(teclas, dino_rect, velocidade)
 
         tela.fill((30, 30, 30))
+        texto_pontos = fonte.render(
+            f"Pontos: {pontos}",
+            True,
+            (255,255,255)
+        )
+
         tela.blit(dino, dino_rect)
         tela.blit(carne, carne_rect)
-
+        tela.blit(texto_pontos, (20,20))
+        
         if dino_rect.colliderect(carne_rect):
+        
+            pontos = fn.calcular_pontos(
+                pontos, 10
+            )
+
             x = random.randint(25, LARGURA_TELA - 25)
             y = random.randint(25, ALTURA_TELA - 25)
-            carne_rect.center = (x, y)
-            print("CATOU A CARNE!")
+
+            carne_rect.center = (x, y) # Gera posição aleatória para a carne
+
+            print(f"Pontos: {pontos}")
 
         pygame.display.update()
         clock.tick(60)
