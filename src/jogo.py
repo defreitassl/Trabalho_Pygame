@@ -17,7 +17,7 @@ def executar_loop_jogo(tela, modo="singleplayer"):
     # PLAYER 2: Inicializa o jogador 2 se o modo for multiplayer
     if modo == "multiplayer":
         dino2 = pygame.image.load(
-            "assets/imagens/dino sprites/Run (2).png"
+            "assets/imagens/dino2 sprites/espinossauro.png"
         ).convert_alpha()
         dino2 = pygame.transform.flip(dino2, True, False)
         dino2 = pygame.transform.scale(dino2, (100, 80))
