@@ -42,6 +42,33 @@ def mover_jogador1(teclas, dino_rect, velocidade):
         dino_rect.bottom = 720
 
 
+def mover_jogador2(teclas, dino_rect, velocidade):
+    """Movimenta o jogador 2 com setas e limita sua posicao na tela."""
+    if teclas[pygame.K_UP]:
+        dino_rect.y -= velocidade
+
+    if teclas[pygame.K_DOWN]:
+        dino_rect.y += velocidade
+
+    if teclas[pygame.K_RIGHT]:
+        dino_rect.x += velocidade
+
+    if teclas[pygame.K_LEFT]:
+        dino_rect.x -= velocidade
+
+    if dino_rect.left < 0:
+        dino_rect.left = 0
+
+    if dino_rect.right > 1080:
+        dino_rect.right = 1080
+
+    if dino_rect.top < 0:
+        dino_rect.top = 0
+
+    if dino_rect.bottom > 720:
+        dino_rect.bottom = 720
+
+
 def tomar_dano(vida_atual, dano):
     """Reduz a vida atual com base no dano recebido."""
     return vida_atual - dano
