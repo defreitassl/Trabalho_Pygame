@@ -27,7 +27,7 @@ FLOR_AMARELA = (238, 202, 54)
 FLOR_ROSA = (226, 93, 146)
 FLOR_AZUL = (74, 151, 219)
 
-METEORO_RAIO_DANO = 78
+METEORO_RAIO_DANO = 156
 METEORO_ALERTA_MS = 1900
 METEORO_IMPACTO_MS = 450
 METEORO_INTERVALO_MIN_MS = 900
@@ -488,6 +488,12 @@ def executar_loop_jogo(tela, modo="singleplayer"):
 
         texto = f"P1: {pontos}" if modo == "multiplayer" else f"Pontos: {pontos}"
         tela.blit(fonte.render(texto, True, (255, 255, 255)), (20, 20))
+
+        segundos = tempo_decorrido // 1000
+        minutos = segundos // 60
+        segundos = segundos % 60
+        texto_tempo = fonte.render(f"{minutos:02d}:{segundos:02d}", True, (255, 255, 255))
+        tela.blit(texto_tempo, texto_tempo.get_rect(center=(LARGURA_TELA // 2, 35)))
 
         if modo == "multiplayer":
             tela.blit(fonte.render(f"P2: {pontos2}", True, (255, 255, 255)), (LARGURA_TELA - 150, 20))

@@ -48,7 +48,7 @@ def test_jogador_na_area_do_meteoro():
     dino_rect = pygame.Rect(100, 100, 100, 80)
     meteoro = {
         "centro": (150, 165),
-        "raio": 78,
+        "raio": 156,
     }
 
     assert jogador_na_area_do_meteoro(dino_rect, meteoro) is True
@@ -59,7 +59,7 @@ def test_jogador_fora_da_area_do_meteoro():
     dino_rect = pygame.Rect(100, 100, 100, 80)
     meteoro = {
         "centro": (400, 400),
-        "raio": 78,
+        "raio": 156,
     }
 
     assert jogador_na_area_do_meteoro(dino_rect, meteoro) is False
