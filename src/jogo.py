@@ -32,6 +32,13 @@ FLOR_AMARELA = (238, 202, 54)
 FLOR_ROSA = (226, 93, 146)
 FLOR_AZUL = (74, 151, 219)
 
+METEORO_RAIO_DANO = 58
+METEORO_ALERTA_MS = 2200
+METEORO_IMPACTO_MS = 450
+METEORO_INTERVALO_MIN_MS = 1600
+METEORO_INTERVALO_MAX_MS = 4200
+PONTOS_POR_SEGUNDO = 2
+
 
 def criar_pe_dino(dino_rect):
     """Retorna a area dos pes usada para colisao com obstaculos."""
@@ -47,6 +54,14 @@ def distancia_entre_rects(rect1, rect2):
     """Calcula a distancia entre os centros de dois retangulos."""
     dx = rect1.centerx - rect2.centerx
     dy = rect1.centery - rect2.centery
+
+    return (dx ** 2 + dy ** 2) ** 0.5
+
+
+def distancia_entre_pontos(ponto_1, ponto_2):
+    """Calcula a distancia entre dois pontos."""
+    dx = ponto_1[0] - ponto_2[0]
+    dy = ponto_1[1] - ponto_2[1]
 
     return (dx ** 2 + dy ** 2) ** 0.5
 
@@ -381,6 +396,193 @@ def mover_com_colisao(dino_rect, movimento_x, movimento_y, arvores):
         dino_rect.bottom = ALTURA_TELA
 
 
+def sortear_proximo_meteoro(agora):
+    """Retorna o instante em que o proximo meteoro deve surgir."""
+    intervalo = random.randint(
+        METEORO_INTERVALO_MIN_MS,
+        METEORO_INTERVALO_MAX_MS,
+    )
+
+    return agora + intervalo
+
+
+def criar_meteoro(agora):
+    """Cria um meteoro com aviso antes do impacto."""
+    return {
+        "centro": (
+            random.randint(METEORO_RAIO_DANO, LARGURA_TELA - METEORO_RAIO_DANO),
+            random.randint(METEORO_RAIO_DANO, ALTURA_TELA - METEORO_RAIO_DANO),
+        ),
+        "raio": METEORO_RAIO_DANO,
+        "criado_em": agora,
+        "impacto_em": agora + METEORO_ALERTA_MS,
+        "finaliza_em": agora + METEORO_ALERTA_MS + METEORO_IMPACTO_MS,
+        "causou_dano": False,
+    }
+
+
+def meteoro_em_alerta(meteoro, agora):
+    """Indica se o meteoro ainda esta no periodo de aviso."""
+    return agora < meteoro["impacto_em"]
+
+
+def meteoro_em_impacto(meteoro, agora):
+    """Indica se o meteoro esta causando dano."""
+    return meteoro["impacto_em"] <= agora < meteoro["finaliza_em"]
+
+
+def meteoro_finalizado(meteoro, agora):
+    """Indica se o meteoro ja terminou sua animacao."""
+    return agora >= meteoro["finaliza_em"]
+
+
+def jogador_na_area_do_meteoro(dino_rect, meteoro):
+    """Verifica se os pes do jogador estao dentro da area de dano."""
+    pe_dino = criar_pe_dino(dino_rect)
+    distancia = distancia_entre_pontos(pe_dino.center, meteoro["centro"])
+
+    return distancia <= meteoro["raio"]
+
+
+def calcular_pontuacao_final(pontos_carne, tempo_sobrevivido_ms):
+    """Calcula a pontuacao total com carne coletada e tempo vivo."""
+    segundos_vivos = tempo_sobrevivido_ms // 1000
+
+    return pontos_carne + segundos_vivos * PONTOS_POR_SEGUNDO
+
+
+def desenhar_sombra_meteoro(tela, meteoro, agora):
+    """Desenha o aviso do impacto no mapa."""
+    centro = meteoro["centro"]
+    raio = meteoro["raio"]
+    restante = max(0, meteoro["impacto_em"] - agora)
+    pulso = 1 + (restante // 180) % 2
+
+    sombra = pygame.Surface((raio * 2 + 8, raio * 2 + 8), pygame.SRCALPHA)
+    pygame.draw.circle(
+        sombra,
+        (35, 15, 15, 105),
+        (raio + 4, raio + 4),
+        raio,
+    )
+    pygame.draw.circle(
+        sombra,
+        (210, 45, 35, 180),
+        (raio + 4, raio + 4),
+        raio - pulso * 3,
+        4,
+    )
+    pygame.draw.circle(
+        sombra,
+        (255, 210, 70, 180),
+        (raio + 4, raio + 4),
+        8,
+    )
+
+    tela.blit(sombra, (centro[0] - raio - 4, centro[1] - raio - 4))
+
+
+def desenhar_impacto_meteoro(tela, meteoro):
+    """Desenha um impacto simples sem depender de imagem externa."""
+    centro = meteoro["centro"]
+    raio = meteoro["raio"]
+
+    pygame.draw.circle(tela, (95, 55, 38), centro, raio)
+    pygame.draw.circle(tela, (210, 78, 38), centro, raio - 10, 5)
+    pygame.draw.circle(tela, (245, 180, 64), centro, raio // 2)
+    pygame.draw.circle(
+        tela,
+        (80, 80, 82),
+        (centro[0] - 12, centro[1] - 8),
+        18,
+    )
+    pygame.draw.circle(
+        tela,
+        (118, 118, 120),
+        (centro[0] + 14, centro[1] + 6),
+        15,
+    )
+    pygame.draw.circle(
+        tela,
+        (55, 55, 58),
+        (centro[0] + 2, centro[1] - 2),
+        24,
+        4,
+    )
+
+
+def desenhar_meteoros(tela, meteoros, agora):
+    """Desenha todos os meteoros ativos."""
+    for meteoro in meteoros:
+        if meteoro_em_alerta(meteoro, agora):
+            desenhar_sombra_meteoro(tela, meteoro, agora)
+        elif meteoro_em_impacto(meteoro, agora):
+            desenhar_impacto_meteoro(tela, meteoro)
+
+
+def desenhar_jogador_morto(tela, dino_rect):
+    """Marca visualmente o local onde o jogador morreu."""
+    pygame.draw.line(
+        tela,
+        (180, 30, 30),
+        (dino_rect.left, dino_rect.top),
+        (dino_rect.right, dino_rect.bottom),
+        5,
+    )
+    pygame.draw.line(
+        tela,
+        (180, 30, 30),
+        (dino_rect.right, dino_rect.top),
+        (dino_rect.left, dino_rect.bottom),
+        5,
+    )
+
+
+def exibir_resultado_partida(tela, modo, resultado):
+    """Mostra o resultado final ate o jogador voltar ao menu."""
+    fonte_titulo = pygame.font.Font("assets/fontes/fonte_pixel.ttf", 52)
+    fonte_texto = pygame.font.Font("assets/fontes/fonte_pixel.ttf", 34)
+    clock = pygame.time.Clock()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "sair"
+            if event.type == pygame.KEYDOWN and event.key in [
+                pygame.K_RETURN,
+                pygame.K_SPACE,
+                pygame.K_ESCAPE,
+            ]:
+                return "menu"
+
+        tela.fill((25, 25, 28))
+
+        titulo = fonte_titulo.render("Fim de jogo", True, (245, 235, 210))
+        tela.blit(titulo, titulo.get_rect(center=(LARGURA_TELA // 2, 170)))
+
+        if modo == "multiplayer":
+            linhas = [
+                f"P1: {resultado['p1']} pontos",
+                f"P2: {resultado['p2']} pontos",
+                resultado["vencedor"],
+                "Pressione Enter para voltar ao menu",
+            ]
+        else:
+            linhas = [
+                f"Pontuacao final: {resultado['p1']}",
+                "Pressione Enter para voltar ao menu",
+            ]
+
+        y = 280
+        for linha in linhas:
+            texto = fonte_texto.render(linha, True, (245, 245, 245))
+            tela.blit(texto, texto.get_rect(center=(LARGURA_TELA // 2, y)))
+            y += 58
+
+        pygame.display.update()
+        clock.tick(30)
+
+
 def executar_loop_jogo(tela, modo="singleplayer"):
     """Executa a tela jogavel integrada ao menu."""
     clock = pygame.time.Clock()
@@ -422,27 +624,44 @@ def executar_loop_jogo(tela, modo="singleplayer"):
     velocidade_normal = 5
     velocidade_lenta = 2
     pontos = 0
+    vivo = True
+    tempo_inicio = pygame.time.get_ticks()
+    tempo_morte = None
+    meteoros = []
+    proximo_meteoro = sortear_proximo_meteoro(tempo_inicio)
 
     if modo == "multiplayer":
         pontos2 = 0
+        vivo2 = True
+        tempo_morte2 = None
 
     while True:
+        agora = pygame.time.get_ticks()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "sair"
 
+        if agora >= proximo_meteoro:
+            meteoros.append(criar_meteoro(agora))
+            proximo_meteoro = sortear_proximo_meteoro(agora)
+
         teclas = pygame.key.get_pressed()
 
-        velocidade = calcular_velocidade(
-            criar_pe_dino(dino_rect),
-            arbustos,
-            velocidade_normal,
-            velocidade_lenta,
-        )
-        movimento_x, movimento_y = obter_movimento_jogador1(teclas, velocidade)
-        mover_com_colisao(dino_rect, movimento_x, movimento_y, arvores)
+        if vivo:
+            velocidade = calcular_velocidade(
+                criar_pe_dino(dino_rect),
+                arbustos,
+                velocidade_normal,
+                velocidade_lenta,
+            )
+            movimento_x, movimento_y = obter_movimento_jogador1(
+                teclas,
+                velocidade,
+            )
+            mover_com_colisao(dino_rect, movimento_x, movimento_y, arvores)
 
-        if modo == "multiplayer":
+        if modo == "multiplayer" and vivo2:
             velocidade2 = calcular_velocidade(
                 criar_pe_dino(dino2_rect),
                 arbustos,
@@ -455,7 +674,32 @@ def executar_loop_jogo(tela, modo="singleplayer"):
             )
             mover_com_colisao(dino2_rect, movimento_x2, movimento_y2, arvores)
 
+        for meteoro in meteoros:
+            if not meteoro_em_impacto(meteoro, agora) or meteoro["causou_dano"]:
+                continue
+
+            if vivo and jogador_na_area_do_meteoro(dino_rect, meteoro):
+                vivo = False
+                tempo_morte = agora
+
+            if (
+                modo == "multiplayer"
+                and vivo2
+                and jogador_na_area_do_meteoro(dino2_rect, meteoro)
+            ):
+                vivo2 = False
+                tempo_morte2 = agora
+
+            meteoro["causou_dano"] = True
+
+        meteoros = [
+            meteoro
+            for meteoro in meteoros
+            if not meteoro_finalizado(meteoro, agora)
+        ]
+
         desenhar_chao(tela, terras, flores, pedras, matinhos)
+        desenhar_meteoros(tela, meteoros, agora)
 
         tela.blit(carne, carne_rect)
 
@@ -465,10 +709,16 @@ def executar_loop_jogo(tela, modo="singleplayer"):
         for arvore in arvores:
             desenhar_tronco_arvore(tela, arvore["visual"])
 
-        tela.blit(dino, dino_rect)
+        if vivo:
+            tela.blit(dino, dino_rect)
+        else:
+            desenhar_jogador_morto(tela, dino_rect)
 
         if modo == "multiplayer":
-            tela.blit(dino2, dino2_rect)
+            if vivo2:
+                tela.blit(dino2, dino2_rect)
+            else:
+                desenhar_jogador_morto(tela, dino2_rect)
 
         for arvore in arvores:
             desenhar_folhas_arvore(tela, arvore["visual"])
@@ -488,7 +738,7 @@ def executar_loop_jogo(tela, modo="singleplayer"):
             )
             tela.blit(texto_pontos2, (LARGURA_TELA - 150, 20))
 
-        if fn.verificar_colisao(dino_rect, carne_rect):
+        if vivo and fn.verificar_colisao(dino_rect, carne_rect):
             pontos = fn.calcular_pontos(pontos, 10)
             carne_rect.center = gerar_posicao_carne(arvores)
             print(
@@ -497,7 +747,7 @@ def executar_loop_jogo(tela, modo="singleplayer"):
                 else f"Pontos: {pontos}"
             )
 
-        if modo == "multiplayer" and fn.verificar_colisao(
+        if modo == "multiplayer" and vivo2 and fn.verificar_colisao(
             dino2_rect,
             carne_rect,
         ):
@@ -507,6 +757,40 @@ def executar_loop_jogo(tela, modo="singleplayer"):
 
         pygame.display.update()
         clock.tick(60)
+
+        partida_finalizada = not vivo
+
+        if modo == "multiplayer":
+            partida_finalizada = not vivo and not vivo2
+
+        if partida_finalizada:
+            if tempo_morte is None:
+                tempo_morte = agora
+
+            resultado = {
+                "p1": calcular_pontuacao_final(
+                    pontos,
+                    tempo_morte - tempo_inicio,
+                )
+            }
+
+            if modo == "multiplayer":
+                if tempo_morte2 is None:
+                    tempo_morte2 = agora
+
+                resultado["p2"] = calcular_pontuacao_final(
+                    pontos2,
+                    tempo_morte2 - tempo_inicio,
+                )
+
+                if resultado["p1"] > resultado["p2"]:
+                    resultado["vencedor"] = "P1 venceu"
+                elif resultado["p2"] > resultado["p1"]:
+                    resultado["vencedor"] = "P2 venceu"
+                else:
+                    resultado["vencedor"] = "Empate"
+
+            return exibir_resultado_partida(tela, modo, resultado)
 
 
 def executar_jogo():
