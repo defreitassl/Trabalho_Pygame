@@ -273,14 +273,21 @@ def sortear_proximo_meteoro(agora, tempo_decorrido_ms):
     return agora + random.randint(intervalo_min, intervalo_max)
 
 
-def criar_meteoro(agora, tempo_decorrido_ms):
+def calcular_raio_meteoro(modo):
+    if modo == "singleplayer":
+        return METEORO_RAIO_DANO * 2
+    return int(METEORO_RAIO_DANO * 1.5)
+
+
+def criar_meteoro(agora, tempo_decorrido_ms, modo="multiplayer"):
     _, _, tempo_alerta = calcular_dificuldade_meteoros(tempo_decorrido_ms)
+    raio = calcular_raio_meteoro(modo)
     return {
         "centro": (
-            random.randint(METEORO_RAIO_DANO, LARGURA_TELA - METEORO_RAIO_DANO),
-            random.randint(METEORO_RAIO_DANO, ALTURA_TELA - METEORO_RAIO_DANO),
+            random.randint(raio, LARGURA_TELA - raio),
+            random.randint(raio, ALTURA_TELA - raio),
         ),
-        "raio": METEORO_RAIO_DANO,
+        "raio": raio,
         "impacto_em": agora + tempo_alerta,
         "finaliza_em": agora + tempo_alerta + METEORO_IMPACTO_MS,
         "causou_dano": False,
@@ -409,7 +416,7 @@ def executar_loop_jogo(tela, modo="singleplayer"):
                 return "sair"
 
         if agora >= proximo_meteoro:
-            meteoros.append(criar_meteoro(agora, tempo_decorrido))
+            meteoros.append(criar_meteoro(agora, tempo_decorrido, modo))
             proximo_meteoro = sortear_proximo_meteoro(agora, tempo_decorrido)
 
         teclas = pygame.key.get_pressed()

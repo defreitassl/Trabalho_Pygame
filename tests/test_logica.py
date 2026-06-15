@@ -4,6 +4,8 @@ from src.funcoes import calcular_pontos, jogador_perdeu, limitar_valor
 from src.jogo import (
     calcular_dificuldade_meteoros,
     calcular_pontuacao_final,
+    calcular_raio_meteoro,
+    criar_meteoro,
     jogador_na_area_do_meteoro,
 )
 
@@ -84,3 +86,16 @@ def test_dificuldade_meteoros_respeita_limites_minimos():
     assert intervalo_min == 350
     assert intervalo_max == 950
     assert tempo_alerta == 850
+
+
+def test_raio_meteoro_maior_no_singleplayer():
+    """Deve usar area maior de meteoro no singleplayer."""
+    assert calcular_raio_meteoro("multiplayer") == 234
+    assert calcular_raio_meteoro("singleplayer") == 312
+
+
+def test_criar_meteoro_usa_raio_do_modo():
+    """Deve criar meteoro com raio baseado no modo de jogo."""
+    meteoro = criar_meteoro(1000, 0, "singleplayer")
+
+    assert meteoro["raio"] == 312
