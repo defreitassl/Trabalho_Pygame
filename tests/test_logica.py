@@ -1,7 +1,11 @@
 import pygame
 
 from src.funcoes import calcular_pontos, jogador_perdeu, limitar_valor
-from src.jogo import calcular_pontuacao_final, jogador_na_area_do_meteoro
+from src.jogo import (
+    calcular_dificuldade_meteoros,
+    calcular_pontuacao_final,
+    jogador_na_area_do_meteoro,
+)
 
 
 def test_calcular_pontos():
@@ -44,7 +48,7 @@ def test_jogador_na_area_do_meteoro():
     dino_rect = pygame.Rect(100, 100, 100, 80)
     meteoro = {
         "centro": (150, 165),
-        "raio": 58,
+        "raio": 78,
     }
 
     assert jogador_na_area_do_meteoro(dino_rect, meteoro) is True
@@ -55,7 +59,28 @@ def test_jogador_fora_da_area_do_meteoro():
     dino_rect = pygame.Rect(100, 100, 100, 80)
     meteoro = {
         "centro": (400, 400),
-        "raio": 58,
+        "raio": 78,
     }
 
     assert jogador_na_area_do_meteoro(dino_rect, meteoro) is False
+
+
+def test_dificuldade_meteoros_aumenta_com_tempo():
+    """Deve reduzir intervalos e aviso conforme a partida avanca."""
+    inicio = calcular_dificuldade_meteoros(0)
+    avancado = calcular_dificuldade_meteoros(60000)
+
+    assert avancado[0] < inicio[0]
+    assert avancado[1] < inicio[1]
+    assert avancado[2] < inicio[2]
+
+
+def test_dificuldade_meteoros_respeita_limites_minimos():
+    """Nao deve reduzir a dificuldade abaixo dos limites definidos."""
+    intervalo_min, intervalo_max, tempo_alerta = calcular_dificuldade_meteoros(
+        600000,
+    )
+
+    assert intervalo_min == 350
+    assert intervalo_max == 950
+    assert tempo_alerta == 850

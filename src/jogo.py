@@ -32,11 +32,15 @@ FLOR_AMARELA = (238, 202, 54)
 FLOR_ROSA = (226, 93, 146)
 FLOR_AZUL = (74, 151, 219)
 
-METEORO_RAIO_DANO = 58
-METEORO_ALERTA_MS = 2200
+METEORO_RAIO_DANO = 78
+METEORO_ALERTA_MS = 1900
 METEORO_IMPACTO_MS = 450
-METEORO_INTERVALO_MIN_MS = 1600
-METEORO_INTERVALO_MAX_MS = 4200
+METEORO_INTERVALO_MIN_MS = 900
+METEORO_INTERVALO_MAX_MS = 2600
+METEORO_NIVEL_DIFICULDADE_MS = 15000
+METEORO_ALERTA_MIN_MS = 850
+METEORO_INTERVALO_MINIMO_MS = 350
+METEORO_INTERVALO_MAXIMO_MINIMO_MS = 950
 PONTOS_POR_SEGUNDO = 2
 
 
@@ -396,18 +400,43 @@ def mover_com_colisao(dino_rect, movimento_x, movimento_y, arvores):
         dino_rect.bottom = ALTURA_TELA
 
 
-def sortear_proximo_meteoro(agora):
+def calcular_dificuldade_meteoros(tempo_decorrido_ms):
+    """Aumenta a dificuldade reduzindo intervalo e aviso com o tempo."""
+    nivel = tempo_decorrido_ms // METEORO_NIVEL_DIFICULDADE_MS
+
+    intervalo_min = max(
+        METEORO_INTERVALO_MINIMO_MS,
+        METEORO_INTERVALO_MIN_MS - nivel * 90,
+    )
+    intervalo_max = max(
+        METEORO_INTERVALO_MAXIMO_MINIMO_MS,
+        METEORO_INTERVALO_MAX_MS - nivel * 180,
+    )
+    tempo_alerta = max(
+        METEORO_ALERTA_MIN_MS,
+        METEORO_ALERTA_MS - nivel * 120,
+    )
+
+    return intervalo_min, intervalo_max, tempo_alerta
+
+
+def sortear_proximo_meteoro(agora, tempo_decorrido_ms):
     """Retorna o instante em que o proximo meteoro deve surgir."""
+    intervalo_min, intervalo_max, _ = calcular_dificuldade_meteoros(
+        tempo_decorrido_ms,
+    )
     intervalo = random.randint(
-        METEORO_INTERVALO_MIN_MS,
-        METEORO_INTERVALO_MAX_MS,
+        intervalo_min,
+        intervalo_max,
     )
 
     return agora + intervalo
 
 
-def criar_meteoro(agora):
+def criar_meteoro(agora, tempo_decorrido_ms):
     """Cria um meteoro com aviso antes do impacto."""
+    _, _, tempo_alerta = calcular_dificuldade_meteoros(tempo_decorrido_ms)
+
     return {
         "centro": (
             random.randint(METEORO_RAIO_DANO, LARGURA_TELA - METEORO_RAIO_DANO),
@@ -415,8 +444,8 @@ def criar_meteoro(agora):
         ),
         "raio": METEORO_RAIO_DANO,
         "criado_em": agora,
-        "impacto_em": agora + METEORO_ALERTA_MS,
-        "finaliza_em": agora + METEORO_ALERTA_MS + METEORO_IMPACTO_MS,
+        "impacto_em": agora + tempo_alerta,
+        "finaliza_em": agora + tempo_alerta + METEORO_IMPACTO_MS,
         "causou_dano": False,
     }
 
@@ -628,7 +657,7 @@ def executar_loop_jogo(tela, modo="singleplayer"):
     tempo_inicio = pygame.time.get_ticks()
     tempo_morte = None
     meteoros = []
-    proximo_meteoro = sortear_proximo_meteoro(tempo_inicio)
+    proximo_meteoro = sortear_proximo_meteoro(tempo_inicio, 0)
 
     if modo == "multiplayer":
         pontos2 = 0
@@ -637,14 +666,15 @@ def executar_loop_jogo(tela, modo="singleplayer"):
 
     while True:
         agora = pygame.time.get_ticks()
+        tempo_decorrido = agora - tempo_inicio
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "sair"
 
         if agora >= proximo_meteoro:
-            meteoros.append(criar_meteoro(agora))
-            proximo_meteoro = sortear_proximo_meteoro(agora)
+            meteoros.append(criar_meteoro(agora, tempo_decorrido))
+            proximo_meteoro = sortear_proximo_meteoro(agora, tempo_decorrido)
 
         teclas = pygame.key.get_pressed()
 
