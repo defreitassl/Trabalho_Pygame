@@ -91,11 +91,21 @@ def test_dificuldade_meteoros_respeita_limites_minimos():
 def test_raio_meteoro_maior_no_singleplayer():
     """Deve usar area maior de meteoro no singleplayer."""
     assert calcular_raio_meteoro("multiplayer") == 234
-    assert calcular_raio_meteoro("singleplayer") == 312
+    assert calcular_raio_meteoro("singleplayer") == 250
 
 
 def test_criar_meteoro_usa_raio_do_modo():
     """Deve criar meteoro com raio baseado no modo de jogo."""
     meteoro = criar_meteoro(1000, 0, "singleplayer")
 
-    assert meteoro["raio"] == 312
+    assert meteoro["raio"] == 250
+
+
+def test_singleplayer_tem_meteoros_mais_rapidos():
+    """Deve acelerar os meteoros no modo singleplayer."""
+    multi = calcular_dificuldade_meteoros(0, "multiplayer")
+    single = calcular_dificuldade_meteoros(0, "singleplayer")
+
+    assert single[0] < multi[0]
+    assert single[1] < multi[1]
+    assert single[2] < multi[2]

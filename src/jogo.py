@@ -260,27 +260,33 @@ def mover_com_colisao(dino_rect, movimento_x, movimento_y, arvores):
         dino_rect.bottom = ALTURA_TELA
 
 
-def calcular_dificuldade_meteoros(tempo_decorrido_ms):
+def calcular_dificuldade_meteoros(tempo_decorrido_ms, modo="multiplayer"):
     nivel = tempo_decorrido_ms // METEORO_NIVEL_DIFICULDADE_MS
     intervalo_min = max(METEORO_INTERVALO_MINIMO_MS, METEORO_INTERVALO_MIN_MS - nivel * 90)
     intervalo_max = max(METEORO_INTERVALO_MAXIMO_MINIMO_MS, METEORO_INTERVALO_MAX_MS - nivel * 180)
     tempo_alerta = max(METEORO_ALERTA_MIN_MS, METEORO_ALERTA_MS - nivel * 120)
+
+    if modo == "singleplayer":
+        intervalo_min = max(METEORO_INTERVALO_MINIMO_MS, int(intervalo_min * 0.65))
+        intervalo_max = max(METEORO_INTERVALO_MAXIMO_MINIMO_MS, int(intervalo_max * 0.65))
+        tempo_alerta = max(METEORO_ALERTA_MIN_MS, int(tempo_alerta * 0.75))
+
     return intervalo_min, intervalo_max, tempo_alerta
 
 
-def sortear_proximo_meteoro(agora, tempo_decorrido_ms):
-    intervalo_min, intervalo_max, _ = calcular_dificuldade_meteoros(tempo_decorrido_ms)
+def sortear_proximo_meteoro(agora, tempo_decorrido_ms, modo="multiplayer"):
+    intervalo_min, intervalo_max, _ = calcular_dificuldade_meteoros(tempo_decorrido_ms, modo)
     return agora + random.randint(intervalo_min, intervalo_max)
 
 
 def calcular_raio_meteoro(modo):
     if modo == "singleplayer":
-        return METEORO_RAIO_DANO * 2
+        return round(METEORO_RAIO_DANO * 1.6)
     return int(METEORO_RAIO_DANO * 1.5)
 
 
 def criar_meteoro(agora, tempo_decorrido_ms, modo="multiplayer"):
-    _, _, tempo_alerta = calcular_dificuldade_meteoros(tempo_decorrido_ms)
+    _, _, tempo_alerta = calcular_dificuldade_meteoros(tempo_decorrido_ms, modo)
     raio = calcular_raio_meteoro(modo)
     return {
         "centro": (
@@ -405,7 +411,7 @@ def executar_loop_jogo(tela, modo="singleplayer"):
     tempo_morte = None
     tempo_morte2 = None
     meteoros = []
-    proximo_meteoro = sortear_proximo_meteoro(tempo_inicio, 0)
+    proximo_meteoro = sortear_proximo_meteoro(tempo_inicio, 0, modo)
 
     while True:
         agora = pygame.time.get_ticks()
@@ -417,7 +423,7 @@ def executar_loop_jogo(tela, modo="singleplayer"):
 
         if agora >= proximo_meteoro:
             meteoros.append(criar_meteoro(agora, tempo_decorrido, modo))
-            proximo_meteoro = sortear_proximo_meteoro(agora, tempo_decorrido)
+            proximo_meteoro = sortear_proximo_meteoro(agora, tempo_decorrido, modo)
 
         teclas = pygame.key.get_pressed()
 
