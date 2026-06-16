@@ -40,8 +40,7 @@ def mover_jogador1(teclas, dino_rect, velocidade):
 
     if dino_rect.bottom > 720:
         dino_rect.bottom = 720
-
-
+        
 def tomar_dano(vida_atual, dano):
     """Reduz a vida atual com base no dano recebido."""
     return vida_atual - dano
