@@ -7,6 +7,7 @@ from src.jogo import (
     calcular_raio_meteoro,
     criar_meteoro,
     jogador_na_area_do_meteoro,
+    sortear_raio_meteoro,
 )
 
 
@@ -95,10 +96,30 @@ def test_raio_meteoro_maior_no_singleplayer():
 
 
 def test_criar_meteoro_usa_raio_do_modo():
-    """Deve criar meteoro com raio baseado no modo de jogo."""
-    meteoro = criar_meteoro(1000, 0, "singleplayer")
+    """Deve criar meteoro com raio entre 30% e 100% do tamanho do modo."""
+    for modo in ["singleplayer", "multiplayer"]:
+        raio_maximo = calcular_raio_meteoro(modo)
+        raio_minimo = int(raio_maximo * 0.3)
 
-    assert meteoro["raio"] == 250
+        for _ in range(20):
+            meteoro = criar_meteoro(1000, 0, modo)
+
+            assert raio_minimo <= meteoro["raio"] <= raio_maximo
+
+
+def test_sortear_raio_meteoro_varia_tamanho():
+    """Deve permitir meteoros menores que o tamanho maximo atual."""
+    raios = {sortear_raio_meteoro("singleplayer") for _ in range(100)}
+
+    assert min(raios) < calcular_raio_meteoro("singleplayer")
+
+
+def test_spawn_meteoros_mais_rapido():
+    """Deve reduzir os intervalos iniciais para spawn 1.2x mais frequente."""
+    intervalo_min, intervalo_max, _ = calcular_dificuldade_meteoros(0, "multiplayer")
+
+    assert intervalo_min == 750
+    assert intervalo_max == 2166
 
 
 def test_singleplayer_tem_meteoros_mais_rapidos():

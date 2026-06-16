@@ -36,6 +36,8 @@ METEORO_NIVEL_DIFICULDADE_MS = 15000
 METEORO_ALERTA_MIN_MS = 850
 METEORO_INTERVALO_MINIMO_MS = 350
 METEORO_INTERVALO_MAXIMO_MINIMO_MS = 950
+METEORO_ESCALA_MINIMA = 0.3
+METEORO_MULTIPLICADOR_SPAWN = 1.2
 PONTOS_POR_SEGUNDO = 2
 
 
@@ -271,6 +273,15 @@ def calcular_dificuldade_meteoros(tempo_decorrido_ms, modo="multiplayer"):
         intervalo_max = max(METEORO_INTERVALO_MAXIMO_MINIMO_MS, int(intervalo_max * 0.65))
         tempo_alerta = max(METEORO_ALERTA_MIN_MS, int(tempo_alerta * 0.75))
 
+    intervalo_min = max(
+        METEORO_INTERVALO_MINIMO_MS,
+        int(intervalo_min / METEORO_MULTIPLICADOR_SPAWN),
+    )
+    intervalo_max = max(
+        METEORO_INTERVALO_MAXIMO_MINIMO_MS,
+        int(intervalo_max / METEORO_MULTIPLICADOR_SPAWN),
+    )
+
     return intervalo_min, intervalo_max, tempo_alerta
 
 
@@ -285,9 +296,15 @@ def calcular_raio_meteoro(modo):
     return int(METEORO_RAIO_DANO * 1.5)
 
 
+def sortear_raio_meteoro(modo):
+    raio_maximo = calcular_raio_meteoro(modo)
+    raio_minimo = max(1, int(raio_maximo * METEORO_ESCALA_MINIMA))
+    return random.randint(raio_minimo, raio_maximo)
+
+
 def criar_meteoro(agora, tempo_decorrido_ms, modo="multiplayer"):
     _, _, tempo_alerta = calcular_dificuldade_meteoros(tempo_decorrido_ms, modo)
-    raio = calcular_raio_meteoro(modo)
+    raio = sortear_raio_meteoro(modo)
     return {
         "centro": (
             random.randint(raio, LARGURA_TELA - raio),
@@ -361,7 +378,7 @@ def exibir_resultado_partida(tela, modo, resultado):
             ]
         else:
             linhas = [
-                f"Pontuacao final: {resultado['p1']}",
+                f"Pontuação Final: {resultado['p1']}",
                 "Pressione Enter para voltar ao menu",
             ]
 
