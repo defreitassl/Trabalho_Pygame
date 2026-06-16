@@ -1,3 +1,4 @@
+import os
 import random
 
 import pygame
@@ -39,6 +40,9 @@ METEORO_INTERVALO_MAXIMO_MINIMO_MS = 950
 METEORO_ESCALA_MINIMA = 0.3
 METEORO_MULTIPLICADOR_SPAWN = 1.2
 PONTOS_POR_SEGUNDO = 2
+DINO_TAMANHO = (100, 80)
+DINO_ANIMACAO_MS = 90
+CAMINHO_SPRITES_DINO1 = os.path.join("assets", "imagens", "dino sprites")
 
 
 def criar_pe_dino(dino_rect):
@@ -49,6 +53,45 @@ def distancia_entre_pontos(ponto_1, ponto_2):
     dx = ponto_1[0] - ponto_2[0]
     dy = ponto_1[1] - ponto_2[1]
     return (dx ** 2 + dy ** 2) ** 0.5
+
+
+def carregar_frames_animacao(prefixo, quantidade):
+    frames = []
+
+    for indice in range(1, quantidade + 1):
+        caminho = os.path.join(CAMINHO_SPRITES_DINO1, f"{prefixo} ({indice}).png")
+        imagem = pygame.image.load(caminho).convert_alpha()
+        frames.append(pygame.transform.scale(imagem, DINO_TAMANHO))
+
+    return frames
+
+
+def carregar_animacoes_dino1():
+    return {
+        "idle": carregar_frames_animacao("Idle", 10),
+        "walk": carregar_frames_animacao("Walk", 10),
+        "run": carregar_frames_animacao("Run", 8),
+        "dead": carregar_frames_animacao("Dead", 8),
+    }
+
+
+def escolher_animacao_dino1(vivo, movendo, lento):
+    if not vivo:
+        return "dead"
+    if not movendo:
+        return "idle"
+    if lento:
+        return "walk"
+    return "run"
+
+
+def obter_frame_animacao(frames, agora, repetir=True, iniciado_em=0):
+    indice = max(0, (agora - iniciado_em) // DINO_ANIMACAO_MS)
+
+    if repetir:
+        return frames[indice % len(frames)]
+
+    return frames[min(indice, len(frames) - 1)]
 
 
 def criar_elementos_chao():
@@ -396,14 +439,17 @@ def executar_loop_jogo(tela, modo="singleplayer"):
     clock = pygame.time.Clock()
     fonte = pygame.font.Font("assets/fontes/fonte_pixel.ttf", 36)
 
-    dino = pygame.image.load("assets/imagens/dino sprites/Run (2).png").convert_alpha()
-    dino = pygame.transform.scale(dino, (100, 80))
-    dino_rect = dino.get_rect(center=(400, 200))
+    animacoes_dino1 = carregar_animacoes_dino1()
+    dino_rect = pygame.Rect(0, 0, *DINO_TAMANHO)
+    dino_rect.center = (400, 200)
+    dino_direcao = "direita"
+    dino_movendo = False
+    dino_lento = False
 
     if modo == "multiplayer":
         dino2 = pygame.image.load("assets/imagens/dino2 sprites/espinossauro.png").convert_alpha()
         dino2 = pygame.transform.flip(dino2, True, False)
-        dino2 = pygame.transform.scale(dino2, (100, 80))
+        dino2 = pygame.transform.scale(dino2, DINO_TAMANHO)
         dino2_rect = dino2.get_rect(center=(680, 200))
 
     carne = pygame.image.load("assets/imagens/MeatUI2.png").convert_alpha()
@@ -443,12 +489,15 @@ def executar_loop_jogo(tela, modo="singleplayer"):
             proximo_meteoro = sortear_proximo_meteoro(agora, tempo_decorrido, modo)
 
         teclas = pygame.key.get_pressed()
+        dino_movendo = False
+        dino_lento = False
 
         if vivo:
             velocidade = 5
             for arbusto in arbustos:
                 if criar_pe_dino(dino_rect).colliderect(arbusto["lentidao"]):
                     velocidade = 2
+                    dino_lento = True
 
             mx = 0
             my = 0
@@ -460,6 +509,11 @@ def executar_loop_jogo(tela, modo="singleplayer"):
                 mx += velocidade
             if teclas[pygame.K_a]:
                 mx -= velocidade
+            dino_movendo = mx != 0 or my != 0
+            if mx > 0:
+                dino_direcao = "direita"
+            elif mx < 0:
+                dino_direcao = "esquerda"
             mover_com_colisao(dino_rect, mx, my, arvores)
 
         if modo == "multiplayer" and vivo2:
@@ -502,10 +556,16 @@ def executar_loop_jogo(tela, modo="singleplayer"):
         for arvore in arvores:
             desenhar_arvore(tela, arvore["visual"])
 
-        if vivo:
-            tela.blit(dino, dino_rect)
-        else:
-            desenhar_jogador_morto(tela, dino_rect)
+        animacao_dino = escolher_animacao_dino1(vivo, dino_movendo, dino_lento)
+        frame_dino = obter_frame_animacao(
+            animacoes_dino1[animacao_dino],
+            agora,
+            repetir=vivo,
+            iniciado_em=tempo_morte or agora,
+        )
+        if dino_direcao == "esquerda":
+            frame_dino = pygame.transform.flip(frame_dino, True, False)
+        tela.blit(frame_dino, frame_dino.get_rect(center=dino_rect.center))
 
         if modo == "multiplayer":
             if vivo2:

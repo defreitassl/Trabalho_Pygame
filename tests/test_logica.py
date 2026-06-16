@@ -6,7 +6,9 @@ from src.jogo import (
     calcular_pontuacao_final,
     calcular_raio_meteoro,
     criar_meteoro,
+    escolher_animacao_dino1,
     jogador_na_area_do_meteoro,
+    obter_frame_animacao,
     sortear_raio_meteoro,
 )
 
@@ -44,6 +46,30 @@ def test_limitar_valor_dentro_do_intervalo():
 def test_calcular_pontuacao_final_soma_carne_e_tempo():
     """Deve somar pontos de carne com bonus por segundos vivos."""
     assert calcular_pontuacao_final(30, 5000) == 40
+
+
+def test_escolher_animacao_dino1_por_estado():
+    """Deve selecionar animacao conforme movimento, lentidao e morte."""
+    assert escolher_animacao_dino1(True, False, False) == "idle"
+    assert escolher_animacao_dino1(True, True, False) == "run"
+    assert escolher_animacao_dino1(True, True, True) == "walk"
+    assert escolher_animacao_dino1(False, True, False) == "dead"
+
+
+def test_obter_frame_animacao_repete_frames():
+    """Deve repetir a animacao enquanto o jogador esta vivo."""
+    frames = ["a", "b", "c"]
+
+    assert obter_frame_animacao(frames, 0) == "a"
+    assert obter_frame_animacao(frames, 90) == "b"
+    assert obter_frame_animacao(frames, 270) == "a"
+
+
+def test_obter_frame_animacao_para_no_ultimo_frame():
+    """Deve manter o ultimo frame em animacoes que nao repetem."""
+    frames = ["a", "b", "c"]
+
+    assert obter_frame_animacao(frames, 1000, repetir=False) == "c"
 
 
 def test_jogador_na_area_do_meteoro():
