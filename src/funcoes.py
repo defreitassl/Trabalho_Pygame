@@ -2,88 +2,30 @@ import pygame
 import random
 from src.menu import ALTURA_TELA, LARGURA_TELA
 
-def gerar_posicao_aleatoria():
-    """Retorna uma posição aleatória dentro dos limites da tela."""
-    
-    x = random.randint(25, LARGURA_TELA - 25)
-    y = random.randint(25, ALTURA_TELA - 25)
 
-    return x, y
+def gerar_posicao_aleatoria():
+    return random.randint(25, LARGURA_TELA - 25), random.randint(25, ALTURA_TELA - 25)
+
 
 def calcular_pontos(pontos_atual, pontos_ganhos):
-    """Soma os pontos ganhos à pontuação atual."""
     return pontos_atual + pontos_ganhos
 
 
+def mover(teclas, rect, velocidade, cima, baixo, direita, esquerda):
+    rect.x += (teclas[direita] - teclas[esquerda]) * velocidade
+    rect.y += (teclas[baixo] - teclas[cima]) * velocidade
+    rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
+
+
 def mover_jogador1(teclas, dino_rect, velocidade):
-    """Movimenta o jogador 1 com WASD e limita sua posicao na tela."""
-    if teclas[pygame.K_w]:
-        dino_rect.y -= velocidade
-
-    if teclas[pygame.K_s]:
-        dino_rect.y += velocidade
-
-    if teclas[pygame.K_d]:
-        dino_rect.x += velocidade
-
-    if teclas[pygame.K_a]:
-        dino_rect.x -= velocidade
-
-    if dino_rect.left < 0:
-        dino_rect.left = 0
-
-    if dino_rect.right > 1080:
-        dino_rect.right = 1080
-
-    if dino_rect.top < 0:
-        dino_rect.top = 0
-
-    if dino_rect.bottom > 720:
-        dino_rect.bottom = 720
+    mover(teclas, dino_rect, velocidade, pygame.K_w, pygame.K_s, pygame.K_d, pygame.K_a)
 
 
 def mover_jogador2(teclas, dino_rect, velocidade):
-    """Movimenta o jogador 2 com setas e limita sua posicao na tela."""
-    if teclas[pygame.K_UP]:
-        dino_rect.y -= velocidade
-
-    if teclas[pygame.K_DOWN]:
-        dino_rect.y += velocidade
-
-    if teclas[pygame.K_RIGHT]:
-        dino_rect.x += velocidade
-
-    if teclas[pygame.K_LEFT]:
-        dino_rect.x -= velocidade
-
-    if dino_rect.left < 0:
-        dino_rect.left = 0
-
-    if dino_rect.right > 1080:
-        dino_rect.right = 1080
-
-    if dino_rect.top < 0:
-        dino_rect.top = 0
-
-    if dino_rect.bottom > 720:
-        dino_rect.bottom = 720
+    mover(teclas, dino_rect, velocidade, pygame.K_UP, pygame.K_DOWN, pygame.K_RIGHT, pygame.K_LEFT)
 
 
-def tomar_dano(vida_atual, dano):
-    """Reduz a vida atual com base no dano recebido."""
-    return vida_atual - dano
-
-
-def jogador_perdeu(vidas):
-    """Indica se o jogador ficou sem vidas."""
-    return vidas <= 0
-
-
-def limitar_valor(valor, minimo, maximo):
-    """Mantém um valor dentro do intervalo [minimo, maximo]."""
-    return max(minimo, min(valor, maximo))
-
-
-def verificar_colisao(retangulo_1, retangulo_2):
-    """Verifica sobreposição entre dois retângulos do Pygame."""
-    return retangulo_1.colliderect(retangulo_2)
+def tomar_dano(vida_atual, dano): return vida_atual - dano
+def jogador_perdeu(vidas): return vidas <= 0
+def limitar_valor(valor, minimo, maximo): return max(minimo, min(valor, maximo))
+def verificar_colisao(retangulo_1, retangulo_2): return retangulo_1.colliderect(retangulo_2)

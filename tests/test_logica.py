@@ -14,42 +14,25 @@ from src.jogo import (
 
 
 def test_calcular_pontos():
-    """Deve somar corretamente os pontos atuais com os pontos ganhos."""
     assert calcular_pontos(10, 5) == 15
 
 
-def test_jogador_perdeu_com_zero_vidas():
-    """Deve indicar derrota quando o total de vidas chega a zero."""
+def test_jogador_perdeu():
     assert jogador_perdeu(0) is True
-
-
-def test_jogador_nao_perdeu_com_vidas():
-    """Nao deve indicar derrota quando o jogador ainda tem vidas."""
     assert jogador_perdeu(3) is False
 
 
-def test_limitar_valor_abaixo_do_minimo():
-    """Deve retornar o limite minimo quando o valor informado for menor."""
+def test_limitar_valor():
     assert limitar_valor(-5, 0, 100) == 0
-
-
-def test_limitar_valor_acima_do_maximo():
-    """Deve retornar o limite maximo quando o valor informado for maior."""
     assert limitar_valor(150, 0, 100) == 100
-
-
-def test_limitar_valor_dentro_do_intervalo():
-    """Deve manter o valor original quando ele ja estiver no intervalo."""
     assert limitar_valor(50, 0, 100) == 50
 
 
 def test_calcular_pontuacao_final_soma_carne_e_tempo():
-    """Deve somar pontos de carne com bonus por segundos vivos."""
     assert calcular_pontuacao_final(30, 5000) == 40
 
 
 def test_escolher_animacao_dino1_por_estado():
-    """Deve selecionar animacao conforme movimento, lentidao e morte."""
     assert escolher_animacao_dino1(True, False, False) == "idle"
     assert escolher_animacao_dino1(True, True, False) == "run"
     assert escolher_animacao_dino1(True, True, True) == "walk"
@@ -57,7 +40,6 @@ def test_escolher_animacao_dino1_por_estado():
 
 
 def test_obter_frame_animacao_repete_frames():
-    """Deve repetir a animacao enquanto o jogador esta vivo."""
     frames = ["a", "b", "c"]
 
     assert obter_frame_animacao(frames, 0) == "a"
@@ -66,14 +48,12 @@ def test_obter_frame_animacao_repete_frames():
 
 
 def test_obter_frame_animacao_para_no_ultimo_frame():
-    """Deve manter o ultimo frame em animacoes que nao repetem."""
     frames = ["a", "b", "c"]
 
     assert obter_frame_animacao(frames, 1000, repetir=False) == "c"
 
 
 def test_jogador_na_area_do_meteoro():
-    """Deve detectar jogador dentro do raio de dano do meteoro."""
     dino_rect = pygame.Rect(100, 100, 100, 80)
     meteoro = {
         "centro": (150, 165),
@@ -84,7 +64,6 @@ def test_jogador_na_area_do_meteoro():
 
 
 def test_jogador_fora_da_area_do_meteoro():
-    """Deve ignorar jogador fora do raio de dano do meteoro."""
     dino_rect = pygame.Rect(100, 100, 100, 80)
     meteoro = {
         "centro": (400, 400),
@@ -95,7 +74,6 @@ def test_jogador_fora_da_area_do_meteoro():
 
 
 def test_dificuldade_meteoros_aumenta_com_tempo():
-    """Deve reduzir intervalos e aviso conforme a partida avanca."""
     inicio = calcular_dificuldade_meteoros(0)
     avancado = calcular_dificuldade_meteoros(60000)
 
@@ -105,7 +83,6 @@ def test_dificuldade_meteoros_aumenta_com_tempo():
 
 
 def test_dificuldade_meteoros_respeita_limites_minimos():
-    """Nao deve reduzir a dificuldade abaixo dos limites definidos."""
     intervalo_min, intervalo_max, tempo_alerta = calcular_dificuldade_meteoros(
         600000,
     )
@@ -116,13 +93,11 @@ def test_dificuldade_meteoros_respeita_limites_minimos():
 
 
 def test_raio_meteoro_maior_no_singleplayer():
-    """Deve usar area maior de meteoro no singleplayer."""
     assert calcular_raio_meteoro("multiplayer") == 234
     assert calcular_raio_meteoro("singleplayer") == 250
 
 
 def test_criar_meteoro_usa_raio_do_modo():
-    """Deve criar meteoro com raio entre 30% e 100% do tamanho do modo."""
     for modo in ["singleplayer", "multiplayer"]:
         raio_maximo = calcular_raio_meteoro(modo)
         raio_minimo = int(raio_maximo * 0.3)
@@ -134,14 +109,12 @@ def test_criar_meteoro_usa_raio_do_modo():
 
 
 def test_sortear_raio_meteoro_varia_tamanho():
-    """Deve permitir meteoros menores que o tamanho maximo atual."""
     raios = {sortear_raio_meteoro("singleplayer") for _ in range(100)}
 
     assert min(raios) < calcular_raio_meteoro("singleplayer")
 
 
 def test_spawn_meteoros_mais_rapido():
-    """Deve reduzir os intervalos iniciais para spawn 1.2x mais frequente."""
     intervalo_min, intervalo_max, _ = calcular_dificuldade_meteoros(0, "multiplayer")
 
     assert intervalo_min == 750
@@ -149,7 +122,6 @@ def test_spawn_meteoros_mais_rapido():
 
 
 def test_singleplayer_tem_meteoros_mais_rapidos():
-    """Deve acelerar os meteoros no modo singleplayer."""
     multi = calcular_dificuldade_meteoros(0, "multiplayer")
     single = calcular_dificuldade_meteoros(0, "singleplayer")
 
