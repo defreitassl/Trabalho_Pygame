@@ -149,6 +149,10 @@ O projeto foi estruturado em módulos para facilitar manutenção e evolução:
 
 ✔ Menu de configurações de volume e sons
 
+✔ Efeitos sonoros de coleta, impacto e morte
+
+✔ Música ambiente no menu e durante a partida
+
 ✔ Testes automatizados com Pytest
 
 ✔ Documentação com Docstrings

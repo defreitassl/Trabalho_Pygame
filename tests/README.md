@@ -13,6 +13,8 @@ Esta pasta contem testes automatizados do projeto.
 - Estados e frames das animacoes.
 - Area de dano, tamanho, intervalo e dificuldade dos meteoros.
 - Leitura e gravacao das configuracoes do menu.
+- Ativacao e volume dos efeitos sonoros.
+- Reproducao em loop da musica do menu.
 
 ## Como executar
 

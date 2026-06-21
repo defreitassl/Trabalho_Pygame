@@ -54,7 +54,7 @@ Durante o desenvolvimento foram adotadas algumas decisões importantes:
 Possíveis evoluções para versões futuras do projeto:
 
 * Sistema de ranking.
-* Efeitos sonoros e música.
+* Efeitos sonoros para os botões do menu.
 * Novos tipos de obstáculos.
 * Power-ups.
 * Sistema de fases.
@@ -70,5 +70,6 @@ Possíveis evoluções para versões futuras do projeto:
 * Sistema de pontuação.
 * Animações dos dois personagens.
 * Menu de configurações.
+* Música ambiente no menu e durante a partida.
 * Testes automatizados.
 * Documentação do projeto.

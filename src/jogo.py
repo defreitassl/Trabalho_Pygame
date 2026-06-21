@@ -5,7 +5,8 @@ import pygame
 
 import src.config as cfg
 import src.funcoes as fn
-from src.menu import ALTURA_TELA, LARGURA_TELA, executar_menu
+import src.sons as sons
+from src.menu import ALTURA_TELA, LARGURA_TELA, carregar_configuracoes, executar_menu
 
 
 def carregar_frames_animacao(pasta_base, prefixo, quantidade):
@@ -322,6 +323,7 @@ def criar_meteoro(agora, tempo_decorrido_ms, modo="multiplayer"):
         "impacto_em": agora + tempo_alerta,
         "finaliza_em": agora + tempo_alerta + cfg.METEORO_IMPACTO_MS,
         "causou_dano": False,
+        "som_tocado": False,
     }
 
 
@@ -416,6 +418,9 @@ def executar_loop_jogo(tela, modo="singleplayer"):
     """
     clock = pygame.time.Clock()
     fonte = pygame.font.Font("assets/fontes/fonte_pixel.ttf", 36)
+    configuracoes = carregar_configuracoes()
+    efeitos = sons.carregar_efeitos(configuracoes)
+    sons.ajustar_volume_musica(configuracoes, durante_jogo=True)
 
     jogador1 = criar_estado_jogador(
         (400, 200),
@@ -481,11 +486,19 @@ def executar_loop_jogo(tela, modo="singleplayer"):
             mover_com_colisao(jogador["rect"], mx, my, arvores)
 
         for meteoro in meteoros:
+            if agora >= meteoro["impacto_em"] and not meteoro["som_tocado"]:
+                sons.tocar_efeito(efeitos, "impacto")
+                meteoro["som_tocado"] = True
+
             if meteoro["impacto_em"] <= agora < meteoro["finaliza_em"] and not meteoro["causou_dano"]:
+                jogador_atingido = False
                 for jogador in jogadores:
                     if jogador["vivo"] and fn.jogador_na_area_do_meteoro(jogador["rect"], meteoro):
                         jogador["vivo"] = False
                         jogador["tempo_morte"] = agora
+                        jogador_atingido = True
+                if jogador_atingido:
+                    sons.tocar_efeito(efeitos, "morte")
                 meteoro["causou_dano"] = True
 
         meteoros = [m for m in meteoros if agora < m["finaliza_em"]]
@@ -517,6 +530,7 @@ def executar_loop_jogo(tela, modo="singleplayer"):
         for numero, jogador in enumerate(jogadores, 1):
             if jogador["vivo"] and jogador["rect"].colliderect(carne_rect):
                 jogador["pontos"] += 10
+                sons.tocar_efeito(efeitos, "coleta")
                 carne_rect.center = gerar_posicao_carne(arvores)
                 print(f"Pontos P{numero}: {jogador['pontos']}" if modo == "multiplayer" else f"Pontos: {jogador['pontos']}")
 
@@ -541,6 +555,7 @@ def executar_jogo():
     Inicializa o Pygame, executa o menu principal
     e controla o fluxo geral do jogo.
     """
+    pygame.mixer.pre_init(44100, -16, 2, 512)
     pygame.init()
     tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
     pygame.display.set_caption("BIG BANG")

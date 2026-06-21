@@ -8,6 +8,7 @@ Esta pasta contém os módulos principais do jogo.
 - `config.py`: constantes de cores, meteoros, personagens e caminhos.
 - `funcoes.py`: funções auxiliares de regra e lógica.
 - `menu.py`: menus, configurações e seleção do modo de jogo.
+- `sons.py`: carregamento e reprodução dos efeitos sonoros.
 
 ## Dica de evolução
 

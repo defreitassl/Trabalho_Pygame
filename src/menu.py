@@ -4,6 +4,8 @@ import random
 
 import pygame
 
+import src.sons as sons
+
 
 LARGURA_TELA, ALTURA_TELA = 1080, 720
 CAMINHO_CONFIGURACOES = os.path.join("data", "configuracoes.json")
@@ -87,8 +89,7 @@ def salvar_configuracoes(configuracoes):
 
 
 def aplicar_volume(configuracoes):
-    if pygame.mixer.get_init():
-        pygame.mixer.music.set_volume(configuracoes["volume"] / 100)
+    sons.ajustar_volume_musica(configuracoes)
 
 
 def carregar_logo():
@@ -152,6 +153,7 @@ def executar_menu(tela):
     logo = carregar_logo()
     configuracoes = carregar_configuracoes()
     aplicar_volume(configuracoes)
+    sons.iniciar_musica_menu(configuracoes)
     secao_atual = "principal"
     layout = {
         "titulo_y": 122, "primeiro_botao_y": 280, "segundo_botao_y": 409,
@@ -179,6 +181,7 @@ def executar_menu(tela):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 salvar_configuracoes(configuracoes)
+                sons.parar_musica_menu()
                 return "sair"
 
             if secao_atual == "principal":
@@ -190,15 +193,18 @@ def executar_menu(tela):
 
                 if verificar_clique_botao(evento, botoes["sair"]):
                     salvar_configuracoes(configuracoes)
+                    sons.parar_musica_menu()
                     return "sair"
 
             elif secao_atual == "modo_jogo":
                 if verificar_clique_botao(evento, botoes["singleplayer"]):
                     salvar_configuracoes(configuracoes)
+                    sons.ajustar_volume_musica(configuracoes, durante_jogo=True)
                     return "singleplayer"
 
                 if verificar_clique_botao(evento, botoes["multiplayer"]):
                     salvar_configuracoes(configuracoes)
+                    sons.ajustar_volume_musica(configuracoes, durante_jogo=True)
                     return "multiplayer"
 
                 if verificar_clique_botao(evento, botoes["voltar_modo"]):
@@ -213,6 +219,10 @@ def executar_menu(tela):
 
                 if verificar_clique_botao(evento, botoes["alternar_sons"]):
                     configuracoes["sons_ligados"] = not configuracoes["sons_ligados"]
+                    if configuracoes["sons_ligados"]:
+                        sons.iniciar_musica_menu(configuracoes)
+                    else:
+                        sons.parar_musica_menu()
                     salvar_configuracoes(configuracoes)
 
                 if verificar_clique_botao(evento, botoes["voltar_configuracoes"]):

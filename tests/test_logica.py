@@ -1,6 +1,7 @@
 import pygame
 
 import src.menu as menu
+import src.sons as sons
 from src.funcoes import (
     calcular_pontuacao_final,
     calcular_dificuldade_meteoros,
@@ -76,6 +77,71 @@ def test_salvar_e_carregar_configuracoes(tmp_path, monkeypatch):
     menu.salvar_configuracoes(configuracoes)
 
     assert menu.carregar_configuracoes() == configuracoes
+
+
+def test_efeitos_nao_carregam_quando_sons_estao_desligados():
+    configuracoes = {"volume": 50, "sons_ligados": False}
+
+    assert sons.carregar_efeitos(configuracoes) == {}
+
+
+def test_tocar_efeito_carregado():
+    class EfeitoFalso:
+        def __init__(self):
+            self.tocou = False
+
+        def play(self):
+            self.tocou = True
+
+    efeito = EfeitoFalso()
+    sons.tocar_efeito({"coleta": efeito}, "coleta")
+
+    assert efeito.tocou is True
+
+
+def test_volume_e_aplicado_aos_efeitos(monkeypatch):
+    class EfeitoFalso:
+        def set_volume(self, volume):
+            self.volume = volume
+
+    monkeypatch.setattr(sons.pygame.mixer, "get_init", lambda: True)
+    monkeypatch.setattr(sons.pygame.mixer, "Sound", lambda caminho: EfeitoFalso())
+
+    efeitos = sons.carregar_efeitos({"volume": 40, "sons_ligados": True})
+
+    assert all(efeito.volume == 0.4 for efeito in efeitos.values())
+
+
+def test_musica_do_menu_inicia_em_loop(monkeypatch):
+    chamadas = {}
+    monkeypatch.setattr(sons.pygame.mixer, "get_init", lambda: True)
+    monkeypatch.setattr(sons.pygame.mixer.music, "get_busy", lambda: False)
+    monkeypatch.setattr(sons.pygame.mixer.music, "load", lambda caminho: chamadas.update(caminho=caminho))
+    monkeypatch.setattr(sons.pygame.mixer.music, "set_volume", lambda volume: chamadas.update(volume=volume))
+    monkeypatch.setattr(sons.pygame.mixer.music, "play", lambda repeticoes: chamadas.update(repeticoes=repeticoes))
+
+    sons.iniciar_musica_menu({"volume": 40, "sons_ligados": True})
+
+    assert chamadas == {"caminho": sons.CAMINHO_MUSICA_MENU, "volume": 0.4, "repeticoes": -1}
+
+
+def test_musica_do_menu_nao_inicia_com_sons_desligados(monkeypatch):
+    caminhos = []
+    monkeypatch.setattr(sons.pygame.mixer.music, "load", caminhos.append)
+
+    sons.iniciar_musica_menu({"volume": 40, "sons_ligados": False})
+
+    assert caminhos == []
+
+
+def test_musica_fica_baixa_durante_o_jogo(monkeypatch):
+    volumes = []
+    monkeypatch.setattr(sons.pygame.mixer, "get_init", lambda: True)
+    monkeypatch.setattr(sons.pygame.mixer.music, "set_volume", volumes.append)
+
+    sons.ajustar_volume_musica({"volume": 30}, durante_jogo=True)
+
+    assert volumes == [0.1]
 
 
 def test_escolher_animacao_por_estado():
