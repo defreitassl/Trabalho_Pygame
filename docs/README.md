@@ -29,7 +29,7 @@ O projeto utiliza **Pytest** para validar funções importantes da lógica do jo
 
 #### Resultado dos testes
 
-![Resultado dos testes](assets/imagens/pytest1.png)
+![Resultado dos testes](/docs/pytest.png)
 
 ---
 
