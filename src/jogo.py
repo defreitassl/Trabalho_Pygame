@@ -26,6 +26,16 @@ CAMINHO_SPRITES_DINO1 = os.path.join("assets", "imagens", "dino sprites")
 
 
 def carregar_frames_animacao(prefixo, quantidade):
+    """
+    Carrega e redimensiona os frames de uma animação a partir dos arquivos de imagem.
+
+    Args:
+        prefixo (str): Prefixo utilizado no nome dos arquivos da animação.
+        quantidade (int): Quantidade de frames da animação.
+
+    Returns:
+        list[pygame.Surface]: Lista contendo os frames carregados.
+    """
     return [
         pygame.transform.scale(
             pygame.image.load(os.path.join(CAMINHO_SPRITES_DINO1, f"{prefixo} ({i}).png")).convert_alpha(),
@@ -36,19 +46,54 @@ def carregar_frames_animacao(prefixo, quantidade):
 
 
 def carregar_animacoes_dino1():
+    """
+    Carrega todas as animações do dinossauro principal.
+
+    Returns:
+        dict: Dicionário contendo os frames das animações organizados por nome.
+    """
     return {k.lower(): carregar_frames_animacao(k, q) for k, q in [("Idle", 10), ("Walk", 10), ("Run", 8), ("Dead", 8)]}
 
 
 def escolher_animacao_dino1(vivo, movendo, lento):
+    """
+    Determina qual animação do dinossauro deve ser exibida.
+
+    Args:
+        vivo (bool): Indica se o jogador está vivo.
+        movendo (bool): Indica se o jogador está se movendo.
+        lento (bool): Indica se o jogador está em uma área de lentidão.
+
+    Returns:
+        str: Nome da animação correspondente ao estado atual.
+    """
     return "dead" if not vivo else "idle" if not movendo else "walk" if lento else "run"
 
 
 def obter_frame_animacao(frames, agora, repetir=True, iniciado_em=0):
+    """
+    Obtém o frame atual de uma animação com base no tempo.
+
+    Args:
+        frames (list): Lista de frames da animação.
+        agora (int): Tempo atual em milissegundos.
+        repetir (bool): Define se a animação deve repetir ao final.
+        iniciado_em (int): Momento em que a animação começou.
+
+    Returns:
+        pygame.Surface: Frame correspondente ao instante atual.
+    """
     indice = max(0, (agora - iniciado_em) // DINO_ANIMACAO_MS)
     return frames[indice % len(frames) if repetir else min(indice, len(frames) - 1)]
 
 
 def criar_elementos_chao():
+    """
+    Cria os elementos decorativos utilizados no cenário.
+
+    Returns:
+        tuple: Listas contendo áreas de terra, flores, pedras e matinhos.
+    """
     terras = [
         [(390, 160), (425, 138), (500, 145), (570, 160), (615, 190), (590, 230), (510, 245), (430, 235), (380, 205)],
         [(760, 335), (805, 315), (890, 320), (950, 345), (930, 390), (850, 405), (780, 385)],
@@ -71,6 +116,16 @@ def criar_elementos_chao():
 
 
 def desenhar_chao(tela, terras, flores, pedras, matinhos):
+    """
+    Desenha o cenário base do jogo.
+
+    Args:
+        tela (pygame.Surface): Superfície onde o cenário será desenhado.
+        terras (list): Áreas de terra do mapa.
+        flores (list): Flores decorativas.
+        pedras (list): Pedras decorativas.
+        matinhos (list): Matinhos distribuídos pelo cenário.
+    """
     tela.fill(VERDE_BASE)
     for mancha in [(40, 40, 220, 130), (350, 20, 260, 120), (780, 70, 230, 150), (70, 500, 240, 120), (450, 520, 260, 130), (800, 430, 220, 150)]:
         pygame.draw.rect(tela, VERDE_CLARO, mancha)
@@ -102,6 +157,13 @@ def desenhar_chao(tela, terras, flores, pedras, matinhos):
 
 
 def desenhar_arbusto(tela, rect):
+    """
+    Desenha um arbusto no cenário.
+
+    Args:
+        tela (pygame.Surface): Superfície onde será desenhado.
+        rect (pygame.Rect): Área de referência do arbusto.
+    """
     x = rect.x
     y = rect.y
     for cor, r in [(FOLHA_ESCURO, (x + 4, y + 24, 62, 20)), (FOLHA_MEDIO, (x + 10, y + 12, 26, 28)), (FOLHA_CLARO, (x + 34, y + 8, 28, 28)), (FOLHA_LUZ, (x + 42, y + 14, 8, 8))]:
@@ -109,6 +171,14 @@ def desenhar_arbusto(tela, rect):
 
 
 def desenhar_arvore(tela, rect, folhas=False):
+    """
+    Desenha uma árvore ou apenas sua copa.
+
+    Args:
+        tela (pygame.Surface): Superfície onde será desenhada.
+        rect (pygame.Rect): Área de referência da árvore.
+        folhas (bool): Se verdadeiro, desenha apenas as folhas.
+    """
     x = rect.x
     y = rect.y
 
@@ -123,6 +193,16 @@ def desenhar_arvore(tela, rect, folhas=False):
 
 
 def criar_objetos_randomizados(areas_seguras):
+    """
+    Cria árvores e arbustos em posições aleatórias do mapa,
+    evitando as áreas seguras definidas.
+
+    Args:
+        areas_seguras (list): Lista de áreas onde objetos não podem surgir.
+
+    Returns:
+        tuple: Listas contendo árvores e arbustos gerados.
+    """
     def objetos(qtd, w, h, margem_x, margem_y, nome, ajuste):
         itens = []
         for _ in range(qtd):
@@ -138,6 +218,15 @@ def criar_objetos_randomizados(areas_seguras):
 
 
 def gerar_posicao_carne(arvores):
+    """
+    Gera uma posição aleatória válida para a carne.
+
+    Args:
+        arvores (list): Lista de árvores presentes no mapa.
+
+    Returns:
+        tuple: Coordenadas centrais da nova posição da carne.
+    """
     while True:
         rect = pygame.Rect(random.randint(40, LARGURA_TELA - 40), random.randint(40, ALTURA_TELA - 40), 50, 50)
         if not any(rect.colliderect(arvore["colisao"]) for arvore in arvores):
@@ -145,6 +234,15 @@ def gerar_posicao_carne(arvores):
 
 
 def mover_com_colisao(dino_rect, movimento_x, movimento_y, arvores):
+    """
+    Move o jogador aplicando colisão com árvores e limites da tela.
+
+    Args:
+        dino_rect (pygame.Rect): Retângulo do jogador.
+        movimento_x (int): Movimento horizontal.
+        movimento_y (int): Movimento vertical.
+        arvores (list): Lista de árvores com áreas de colisão.
+    """
     for eixo, mov in [("x", movimento_x), ("y", movimento_y)]:
         setattr(dino_rect, eixo, getattr(dino_rect, eixo) + mov)
         pe_dino = fn.criar_pe_dino(dino_rect)
@@ -159,6 +257,17 @@ def mover_com_colisao(dino_rect, movimento_x, movimento_y, arvores):
     dino_rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
 
 def criar_meteoro(agora, tempo_decorrido_ms, modo="multiplayer"):
+    """
+    Cria um meteoro com posição, raio e tempos definidos.
+
+    Args:
+        agora (int): Tempo atual em milissegundos.
+        tempo_decorrido_ms (int): Tempo de partida já transcorrido.
+        modo (str): Modo de jogo atual.
+
+    Returns:
+        dict: Dados do meteoro criado.
+    """
     _, _, tempo_alerta = fn.calcular_dificuldade_meteoros(tempo_decorrido_ms, modo)
     raio = fn.sortear_raio_meteoro(modo)
     return {
@@ -174,6 +283,14 @@ def criar_meteoro(agora, tempo_decorrido_ms, modo="multiplayer"):
 
 
 def desenhar_meteoros(tela, meteoros, agora):
+    """
+    Desenha os meteoros ativos e seus avisos de impacto.
+
+    Args:
+        tela (pygame.Surface): Superfície onde serão desenhados.
+        meteoros (list): Lista de meteoros ativos.
+        agora (int): Tempo atual em milissegundos.
+    """
     for meteoro in meteoros:
         centro = meteoro["centro"]
         raio = meteoro["raio"]
@@ -189,11 +306,29 @@ def desenhar_meteoros(tela, meteoros, agora):
 
 
 def desenhar_jogador_morto(tela, rect):
+    """
+    Exibe um marcador visual indicando que o jogador morreu.
+
+    Args:
+        tela (pygame.Surface): Superfície onde será desenhado.
+        rect (pygame.Rect): Área ocupada pelo jogador.
+    """
     pygame.draw.line(tela, (180, 30, 30), (rect.left, rect.top), (rect.right, rect.bottom), 5)
     pygame.draw.line(tela, (180, 30, 30), (rect.right, rect.top), (rect.left, rect.bottom), 5)
 
 
 def exibir_resultado_partida(tela, modo, resultado):
+    """
+    Exibe a tela de fim de partida e aguarda uma ação do jogador.
+
+    Args:
+        tela (pygame.Surface): Superfície principal do jogo.
+        modo (str): Modo de jogo utilizado.
+        resultado (dict): Informações finais da partida.
+
+    Returns:
+        str: "menu" para retornar ao menu ou "sair" para encerrar o jogo.
+    """
     fonte_titulo = pygame.font.Font("assets/fontes/fonte_pixel.ttf", 52)
     fonte_texto = pygame.font.Font("assets/fontes/fonte_pixel.ttf", 34)
     clock = pygame.time.Clock()
@@ -235,6 +370,19 @@ def exibir_resultado_partida(tela, modo, resultado):
 
 
 def executar_loop_jogo(tela, modo="singleplayer"):
+    """
+    Executa o loop principal da partida.
+
+    Controla movimentação, colisões, pontuação, meteoros,
+    renderização e condições de derrota.
+
+    Args:
+        tela (pygame.Surface): Superfície principal do jogo.
+        modo (str): Modo de jogo selecionado.
+
+    Returns:
+        str: Resultado da partida ou ação escolhida pelo jogador.
+    """
     clock = pygame.time.Clock()
     fonte = pygame.font.Font("assets/fontes/fonte_pixel.ttf", 36)
 
@@ -370,6 +518,10 @@ def executar_loop_jogo(tela, modo="singleplayer"):
 
 
 def executar_jogo():
+    """
+    Inicializa o Pygame, executa o menu principal
+    e controla o fluxo geral do jogo.
+    """
     pygame.init()
     tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
     pygame.display.set_caption("BIG BANG")
