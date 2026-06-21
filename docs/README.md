@@ -29,6 +29,10 @@ O projeto utiliza **Pytest** para validar funções importantes da lógica do jo
 
 #### Resultado dos testes
 
+O comando `python -m pytest` valida atualmente pontuação, movimentação,
+colisões, animações e dificuldade dos meteoros. A imagem abaixo registra
+uma execução anterior da suíte:
+
 ![Resultado dos testes](/docs/pytest.png)
 
 ---
@@ -54,7 +58,7 @@ Possíveis evoluções para versões futuras do projeto:
 * Novos tipos de obstáculos.
 * Power-ups.
 * Sistema de fases.
-* Menu de configurações.
+* Diferentes mapas.
 
 ---
 
@@ -64,6 +68,7 @@ Possíveis evoluções para versões futuras do projeto:
 * Implementação do modo Multiplayer.
 * Sistema de meteoros.
 * Sistema de pontuação.
+* Animações dos dois personagens.
+* Menu de configurações.
 * Testes automatizados.
 * Documentação do projeto.
-

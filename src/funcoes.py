@@ -1,33 +1,10 @@
-import pygame
+import math
 import random
 
-from src.config import (
-    METEORO_RAIO_DANO,
-    METEORO_ALERTA_MS,
-    METEORO_INTERVALO_MIN_MS,
-    METEORO_INTERVALO_MAX_MS,
-    METEORO_NIVEL_DIFICULDADE_MS,
-    METEORO_ALERTA_MIN_MS,
-    METEORO_INTERVALO_MINIMO_MS,
-    METEORO_INTERVALO_MAXIMO_MINIMO_MS,
-    METEORO_ESCALA_MINIMA,
-    METEORO_MULTIPLICADOR_SPAWN,
-    PONTOS_POR_SEGUNDO,
-)
+import pygame
 
-def calcular_pontos(pontos_atual, pontos_ganhos):
-    """
-    Soma os pontos ganhos à pontuação atual do jogador.
+import src.config as cfg
 
-    Args:
-        pontos_atual (int): Pontuação atual
-        pontos_ganhos (int): Quantidade de pontos a adicionar
-    
-    Returns:
-        int: Nova pontuação do jogador.
-    """
-    return pontos_atual + pontos_ganhos
-        
 def criar_pe_dino(dino_rect):
     """
     Cria o retângulo que representa os pés do dinossauro.
@@ -43,19 +20,6 @@ def criar_pe_dino(dino_rect):
     """
     return pygame.Rect(dino_rect.x + 30, dino_rect.y + 58, 42, 18)
 
-def distancia_entre_pontos(ponto_1, ponto_2):
-    """
-    Calcula a distância euclidiana entre dois pontos.
-
-    Args:
-        ponto_1 (tuple): Coordenadas (x, y) do primeiro ponto.
-        ponto_2 (tuple): Coordenadas (x, y) do segundo ponto.
-
-    Returns:
-        float: Distância entre os dois pontos.
-    """
-    return ((ponto_1[0] - ponto_2[0]) ** 2 + (ponto_1[1] - ponto_2[1]) ** 2) ** 0.5
-
 def calcular_dificuldade_meteoros(tempo_decorrido_ms, modo="multiplayer"):
     """
     Calcula os parâmetros de dificuldade dos meteoros.
@@ -70,18 +34,18 @@ def calcular_dificuldade_meteoros(tempo_decorrido_ms, modo="multiplayer"):
     Returns:
         tuple: Intervalo mínimo, intervalo máximo e tempo de alerta.
     """
-    nivel = tempo_decorrido_ms // METEORO_NIVEL_DIFICULDADE_MS
-    intervalo_min = max(METEORO_INTERVALO_MINIMO_MS, METEORO_INTERVALO_MIN_MS - nivel * 90)
-    intervalo_max = max(METEORO_INTERVALO_MAXIMO_MINIMO_MS, METEORO_INTERVALO_MAX_MS - nivel * 180)
-    tempo_alerta = max(METEORO_ALERTA_MIN_MS, METEORO_ALERTA_MS - nivel * 120)
+    nivel = tempo_decorrido_ms // cfg.METEORO_NIVEL_DIFICULDADE_MS
+    intervalo_min = max(cfg.METEORO_INTERVALO_MINIMO_MS, cfg.METEORO_INTERVALO_MIN_MS - nivel * cfg.METEORO_REDUCAO_INTERVALO_MIN_MS)
+    intervalo_max = max(cfg.METEORO_INTERVALO_MAXIMO_MINIMO_MS, cfg.METEORO_INTERVALO_MAX_MS - nivel * cfg.METEORO_REDUCAO_INTERVALO_MAX_MS)
+    tempo_alerta = max(cfg.METEORO_ALERTA_MIN_MS, cfg.METEORO_ALERTA_MS - nivel * cfg.METEORO_REDUCAO_ALERTA_MS)
 
     if modo == "singleplayer":
-        intervalo_min, intervalo_max = max(METEORO_INTERVALO_MINIMO_MS, int(intervalo_min * 0.65)), max(METEORO_INTERVALO_MAXIMO_MINIMO_MS, int(intervalo_max * 0.65))
-        tempo_alerta = max(METEORO_ALERTA_MIN_MS, int(tempo_alerta * 0.75))
+        intervalo_min, intervalo_max = max(cfg.METEORO_INTERVALO_MINIMO_MS, int(intervalo_min * 0.65)), max(cfg.METEORO_INTERVALO_MAXIMO_MINIMO_MS, int(intervalo_max * 0.65))
+        tempo_alerta = max(cfg.METEORO_ALERTA_MIN_MS, int(tempo_alerta * 0.75))
 
     return (
-        max(METEORO_INTERVALO_MINIMO_MS, int(intervalo_min / METEORO_MULTIPLICADOR_SPAWN)),
-        max(METEORO_INTERVALO_MAXIMO_MINIMO_MS, int(intervalo_max / METEORO_MULTIPLICADOR_SPAWN)),
+        max(cfg.METEORO_INTERVALO_MINIMO_MS, int(intervalo_min / cfg.METEORO_MULTIPLICADOR_SPAWN)),
+        max(cfg.METEORO_INTERVALO_MAXIMO_MINIMO_MS, int(intervalo_max / cfg.METEORO_MULTIPLICADOR_SPAWN)),
         tempo_alerta,
     )
 
@@ -112,7 +76,7 @@ def calcular_raio_meteoro(modo):
     Returns:
         int: Raio máximo do meteoro.
     """
-    return round(METEORO_RAIO_DANO * 1.6) if modo == "singleplayer" else int(METEORO_RAIO_DANO * 1.5)
+    return round(cfg.METEORO_RAIO_DANO * 1.6) if modo == "singleplayer" else int(cfg.METEORO_RAIO_DANO * 1.5)
 
 def sortear_raio_meteoro(modo):
     """
@@ -125,7 +89,7 @@ def sortear_raio_meteoro(modo):
         int: Raio sorteado para o meteoro.
     """
     raio_maximo = calcular_raio_meteoro(modo)
-    return random.randint(max(1, int(raio_maximo * METEORO_ESCALA_MINIMA)), raio_maximo)
+    return random.randint(max(1, int(raio_maximo * cfg.METEORO_ESCALA_MINIMA)), raio_maximo)
 
 
 def jogador_na_area_do_meteoro(dino_rect, meteoro):
@@ -140,7 +104,7 @@ def jogador_na_area_do_meteoro(dino_rect, meteoro):
         bool: True se o jogador estiver na área de dano,
               False caso contrário.
     """
-    return distancia_entre_pontos(criar_pe_dino(dino_rect).center, meteoro["centro"]) <= meteoro["raio"]
+    return math.dist(criar_pe_dino(dino_rect).center, meteoro["centro"]) <= meteoro["raio"]
 
 
 def calcular_pontuacao_final(pontos_carne, tempo_sobrevivido_ms):
@@ -157,7 +121,7 @@ def calcular_pontuacao_final(pontos_carne, tempo_sobrevivido_ms):
     Returns:
         int: Pontuação final do jogador.
     """
-    return pontos_carne + (tempo_sobrevivido_ms // 1000) * PONTOS_POR_SEGUNDO
+    return pontos_carne + (tempo_sobrevivido_ms // 1000) * cfg.PONTOS_POR_SEGUNDO
 
 
 def velocidade_jogador(rect, arbustos):
@@ -192,17 +156,14 @@ def movimento_teclas(teclas, velocidade, cima, baixo, direita, esquerda):
     Returns:
         tuple: Deslocamento horizontal e vertical (x, y).
     """
-    return ((teclas[direita] - teclas[esquerda]) * velocidade, (teclas[baixo] - teclas[cima]) * velocidade)
-
-def verificar_colisao(retangulo_1, retangulo_2): 
-    """
-    Verifica se dois retângulos estão colidindo.
-
-    Args:
-        retangulo_1 (pygame.Rect): Primeiro retângulo.
-        retangulo_2 (pygame.Rect): Segundo retângulo.
-
-    Returns:
-        bool: True se houver colisão, False caso contrário.
-    """
-    return retangulo_1.colliderect(retangulo_2)
+    movimento_x = 0
+    movimento_y = 0
+    if teclas[direita]:
+        movimento_x += velocidade
+    if teclas[esquerda]:
+        movimento_x -= velocidade
+    if teclas[baixo]:
+        movimento_y += velocidade
+    if teclas[cima]:
+        movimento_y -= velocidade
+    return movimento_x, movimento_y

@@ -1,69 +1,50 @@
-import os
 import random
+import os
 
 import pygame
 
+import src.config as cfg
 import src.funcoes as fn
 from src.menu import ALTURA_TELA, LARGURA_TELA, executar_menu
 
-from src.config import (
-    VERDE_BASE,
-    VERDE_CLARO,
-    VERDE_ESCURO,
-    VERDE_GRAMA,
-    TERRA,
-    TERRA_CLARA,
-    TERRA_ESCURA,
-    FOLHA_ESCURO,
-    FOLHA_MEDIO,
-    FOLHA_CLARO,
-    FOLHA_LUZ,
-    TRONCO,
-    TRONCO_ESCURO,
-    TRONCO_CLARO,
-    PEDRA,
-    PEDRA_LUZ,
-    FLOR_BRANCA,
-    FLOR_AMARELA,
-    FLOR_ROSA,
-    FLOR_AZUL,
-    METEORO_IMPACTO_MS,
-    DINO_TAMANHO,
-    DINO_ANIMACAO_MS,
-    CAMINHO_SPRITES_DINO1,
-)
 
-def carregar_frames_animacao(prefixo, quantidade):
+def carregar_frames_animacao(pasta_base, prefixo, quantidade):
     """
-    Carrega e redimensiona os frames de uma animação a partir dos arquivos de imagem.
+    Carrega uma sequencia de frames a partir de arquivos PNG.
 
     Args:
-        prefixo (str): Prefixo utilizado no nome dos arquivos da animação.
-        quantidade (int): Quantidade de frames da animação.
+        pasta_base (str): Pasta onde os frames estao armazenados.
+        prefixo (str): Prefixo do estado, ex.: Idle ou Run.
+        quantidade (int): Quantidade de frames.
 
     Returns:
-        list[pygame.Surface]: Lista contendo os frames carregados.
+        list[pygame.Surface]: Frames redimensionados.
     """
     return [
         pygame.transform.scale(
-            pygame.image.load(os.path.join(CAMINHO_SPRITES_DINO1, f"{prefixo} ({i}).png")).convert_alpha(),
-            DINO_TAMANHO,
+            pygame.image.load(os.path.join(pasta_base, f"{prefixo} ({indice}).png")).convert_alpha(),
+            cfg.DINO_TAMANHO,
         )
-        for i in range(1, quantidade + 1)
+        for indice in range(1, quantidade + 1)
     ]
 
 
-def carregar_animacoes_dino1():
+def carregar_animacoes(pasta):
     """
-    Carrega todas as animações do dinossauro principal.
+    Carrega as animacoes de um dinossauro.
 
     Returns:
-        dict: Dicionário contendo os frames das animações organizados por nome.
+        dict: Frames organizados por nome de animacao.
     """
-    return {k.lower(): carregar_frames_animacao(k, q) for k, q in [("Idle", 10), ("Walk", 10), ("Run", 8), ("Dead", 8)]}
+    return {
+        "idle": carregar_frames_animacao(pasta, "Idle", 2),
+        "walk": carregar_frames_animacao(pasta, "Run", 2),
+        "run": carregar_frames_animacao(pasta, "Run", 2),
+        "dead": carregar_frames_animacao(pasta, "Dead", 1),
+    }
 
 
-def escolher_animacao_dino1(vivo, movendo, lento):
+def escolher_animacao_personagem(vivo, movendo, lento):
     """
     Determina qual animação do dinossauro deve ser exibida.
 
@@ -75,7 +56,13 @@ def escolher_animacao_dino1(vivo, movendo, lento):
     Returns:
         str: Nome da animação correspondente ao estado atual.
     """
-    return "dead" if not vivo else "idle" if not movendo else "walk" if lento else "run"
+    if not vivo:
+        return "dead"
+    if not movendo:
+        return "idle"
+    if lento:
+        return "walk"
+    return "run"
 
 
 def obter_frame_animacao(frames, agora, repetir=True, iniciado_em=0):
@@ -91,8 +78,59 @@ def obter_frame_animacao(frames, agora, repetir=True, iniciado_em=0):
     Returns:
         pygame.Surface: Frame correspondente ao instante atual.
     """
-    indice = max(0, (agora - iniciado_em) // DINO_ANIMACAO_MS)
+    indice = max(0, (agora - iniciado_em) // cfg.DINO_ANIMACAO_MS)
     return frames[indice % len(frames) if repetir else min(indice, len(frames) - 1)]
+
+
+def criar_estado_jogador(posicao, controles, pasta_sprites):
+    """
+    Cria o estado de animacao e jogo de um personagem.
+
+    Args:
+        posicao (tuple): Posicao inicial do jogador.
+        controles (tuple): Teclas de movimento.
+        pasta_sprites (str): Pasta com os sprites do personagem.
+
+    Returns:
+        dict: Estado consolidado do jogador.
+    """
+    rect = pygame.Rect(0, 0, *cfg.DINO_TAMANHO)
+    rect.center = posicao
+    return {
+        "rect": rect,
+        "controles": controles,
+        "animacoes": carregar_animacoes(pasta_sprites),
+        "pontos": 0,
+        "vivo": True,
+        "tempo_morte": None,
+        "direcao": "direita",
+        "movendo": False,
+        "lento": False,
+    }
+
+
+def obter_sprite_jogador(jogador, agora):
+    """
+    Resolve o sprite atual de um jogador a partir do seu estado.
+
+    Args:
+        jogador (dict): Estado do personagem.
+        agora (int): Tempo atual em milissegundos.
+
+    Returns:
+        tuple[pygame.Surface, pygame.Rect]: Sprite final e retangulo de desenho.
+    """
+    nome_animacao = escolher_animacao_personagem(jogador["vivo"], jogador["movendo"], jogador["lento"])
+    sprite = obter_frame_animacao(
+        jogador["animacoes"][nome_animacao],
+        agora,
+        repetir=jogador["vivo"],
+        iniciado_em=jogador["tempo_morte"] or agora,
+    )
+
+    if jogador["direcao"] == "esquerda":
+        sprite = pygame.transform.flip(sprite, True, False)
+    return sprite, sprite.get_rect(center=jogador["rect"].center)
 
 
 def criar_elementos_chao():
@@ -108,10 +146,10 @@ def criar_elementos_chao():
         [(190, 580), (250, 555), (350, 565), (430, 595), (400, 645), (295, 655), (205, 625)],
     ]
     flores = [
-        (110, 260, FLOR_BRANCA), (270, 420, FLOR_ROSA),
-        (530, 330, FLOR_AZUL), (720, 165, FLOR_BRANCA),
-        (965, 250, FLOR_AMARELA), (600, 620, FLOR_BRANCA),
-        (860, 590, FLOR_AZUL),
+        (110, 260, cfg.FLOR_BRANCA), (270, 420, cfg.FLOR_ROSA),
+        (530, 330, cfg.FLOR_AZUL), (720, 165, cfg.FLOR_BRANCA),
+        (965, 250, cfg.FLOR_AMARELA), (600, 620, cfg.FLOR_BRANCA),
+        (860, 590, cfg.FLOR_AZUL),
     ]
     pedras = [(60, 95), (340, 90), (690, 470), (990, 520), (160, 650)]
     matinhos = [
@@ -134,33 +172,33 @@ def desenhar_chao(tela, terras, flores, pedras, matinhos):
         pedras (list): Pedras decorativas.
         matinhos (list): Matinhos distribuídos pelo cenário.
     """
-    tela.fill(VERDE_BASE)
+    tela.fill(cfg.VERDE_BASE)
     for mancha in [(40, 40, 220, 130), (350, 20, 260, 120), (780, 70, 230, 150), (70, 500, 240, 120), (450, 520, 260, 130), (800, 430, 220, 150)]:
-        pygame.draw.rect(tela, VERDE_CLARO, mancha)
+        pygame.draw.rect(tela, cfg.VERDE_CLARO, mancha)
 
     for pontos in terras:
-        pygame.draw.polygon(tela, TERRA, pontos)
+        pygame.draw.polygon(tela, cfg.TERRA, pontos)
         for x, y in pontos:
-            pygame.draw.rect(tela, VERDE_GRAMA, (x - 6, y - 4, 12, 6))
+            pygame.draw.rect(tela, cfg.VERDE_GRAMA, (x - 6, y - 4, 12, 6))
 
         min_x, max_x = min(p[0] for p in pontos), max(p[0] for p in pontos)
         min_y, max_y = min(p[1] for p in pontos), max(p[1] for p in pontos)
-        for qtd, cor, w, h, ax, ay in [(12, TERRA_ESCURA, 9, 3, 31, 17), (4, TERRA_CLARA, 14, 5, 47, 23)]:
+        for qtd, cor, w, h, ax, ay in [(12, cfg.TERRA_ESCURA, 9, 3, 31, 17), (4, cfg.TERRA_CLARA, 14, 5, 47, 23)]:
             for i in range(qtd):
                 pygame.draw.rect(tela, cor, (min_x + (i * ax) % max(1, max_x - min_x), min_y + (i * ay) % max(1, max_y - min_y), w, h))
 
     for x, y, tipo in matinhos:
-        itens = [(VERDE_GRAMA, (x, y + 10, 18, 4)), (VERDE_GRAMA, (x + 6, y + 4, 4, 12))] if tipo == 1 else [(VERDE_ESCURO, (x + 8, y, 7, 7)), (VERDE_CLARO, (x + 18, y + 10, 7, 7))]
+        itens = [(cfg.VERDE_GRAMA, (x, y + 10, 18, 4)), (cfg.VERDE_GRAMA, (x + 6, y + 4, 4, 12))] if tipo == 1 else [(cfg.VERDE_ESCURO, (x + 8, y, 7, 7)), (cfg.VERDE_CLARO, (x + 18, y + 10, 7, 7))]
         for cor, rect in itens:
             pygame.draw.rect(tela, cor, rect)
 
     for x, y, cor in flores:
         for rect in [(x, y - 5, 6, 6), (x, y + 5, 6, 6), (x - 5, y, 6, 6), (x + 5, y, 6, 6)]:
             pygame.draw.rect(tela, cor, rect)
-        pygame.draw.rect(tela, FLOR_AMARELA, (x + 1, y + 1, 4, 4))
+        pygame.draw.rect(tela, cfg.FLOR_AMARELA, (x + 1, y + 1, 4, 4))
 
     for x, y in pedras:
-        for cor, rect in [(PEDRA, (x, y + 8, 28, 14)), (PEDRA_LUZ, (x + 8, y, 16, 10)), ((76, 76, 76), (x + 2, y + 18, 24, 5))]:
+        for cor, rect in [(cfg.PEDRA, (x, y + 8, 28, 14)), (cfg.PEDRA_LUZ, (x + 8, y, 16, 10)), ((76, 76, 76), (x + 2, y + 18, 24, 5))]:
             pygame.draw.rect(tela, cor, rect)
 
 
@@ -174,7 +212,7 @@ def desenhar_arbusto(tela, rect):
     """
     x = rect.x
     y = rect.y
-    for cor, r in [(FOLHA_ESCURO, (x + 4, y + 24, 62, 20)), (FOLHA_MEDIO, (x + 10, y + 12, 26, 28)), (FOLHA_CLARO, (x + 34, y + 8, 28, 28)), (FOLHA_LUZ, (x + 42, y + 14, 8, 8))]:
+    for cor, r in [(cfg.FOLHA_ESCURO, (x + 4, y + 24, 62, 20)), (cfg.FOLHA_MEDIO, (x + 10, y + 12, 26, 28)), (cfg.FOLHA_CLARO, (x + 34, y + 8, 28, 28)), (cfg.FOLHA_LUZ, (x + 42, y + 14, 8, 8))]:
         pygame.draw.rect(tela, cor, r)
 
 
@@ -191,10 +229,10 @@ def desenhar_arvore(tela, rect, folhas=False):
     y = rect.y
 
     partes = [
-        (FOLHA_ESCURO, (x + 14, y + 40, 82, 46)), (FOLHA_MEDIO, (x + 4, y + 52, 42, 35)), (FOLHA_MEDIO, (x + 56, y + 50, 44, 36)),
-        (FOLHA_MEDIO, (x + 24, y + 18, 58, 48)), (FOLHA_CLARO, (x + 36, y + 8, 42, 36)), (FOLHA_CLARO, (x + 48, y + 34, 38, 32)), (FOLHA_LUZ, (x + 48, y + 18, 10, 10)),
+        (cfg.FOLHA_ESCURO, (x + 14, y + 40, 82, 46)), (cfg.FOLHA_MEDIO, (x + 4, y + 52, 42, 35)), (cfg.FOLHA_MEDIO, (x + 56, y + 50, 44, 36)),
+        (cfg.FOLHA_MEDIO, (x + 24, y + 18, 58, 48)), (cfg.FOLHA_CLARO, (x + 36, y + 8, 42, 36)), (cfg.FOLHA_CLARO, (x + 48, y + 34, 38, 32)), (cfg.FOLHA_LUZ, (x + 48, y + 18, 10, 10)),
     ] if folhas else [
-        ((52, 120, 46), (x + 30, y + 104, 50, 14)), (TRONCO_ESCURO, (x + 39, y + 60, 30, 58)), (TRONCO, (x + 43, y + 56, 25, 58)), (TRONCO_CLARO, (x + 52, y + 64, 5, 36)),
+        ((52, 120, 46), (x + 30, y + 104, 50, 14)), (cfg.TRONCO_ESCURO, (x + 39, y + 60, 30, 58)), (cfg.TRONCO, (x + 43, y + 56, 25, 58)), (cfg.TRONCO_CLARO, (x + 52, y + 64, 5, 36)),
     ]
     for cor, r in partes:
         pygame.draw.rect(tela, cor, r)
@@ -251,17 +289,14 @@ def mover_com_colisao(dino_rect, movimento_x, movimento_y, arvores):
         movimento_y (int): Movimento vertical.
         arvores (list): Lista de árvores com áreas de colisão.
     """
-    for eixo, mov in [("x", movimento_x), ("y", movimento_y)]:
-        setattr(dino_rect, eixo, getattr(dino_rect, eixo) + mov)
-        pe_dino = fn.criar_pe_dino(dino_rect)
-        for arvore in arvores:
-            c = arvore["colisao"]
-            if pe_dino.colliderect(c) and mov:
-                if eixo == "x":
-                    dino_rect.x += c.right - pe_dino.left if mov < 0 else -(pe_dino.right - c.left)
-                else:
-                    dino_rect.y += c.bottom - pe_dino.top if mov < 0 else -(pe_dino.bottom - c.top)
-                pe_dino = fn.criar_pe_dino(dino_rect)
+    dino_rect.x += movimento_x
+    if any(fn.criar_pe_dino(dino_rect).colliderect(arvore["colisao"]) for arvore in arvores):
+        dino_rect.x -= movimento_x
+
+    dino_rect.y += movimento_y
+    if any(fn.criar_pe_dino(dino_rect).colliderect(arvore["colisao"]) for arvore in arvores):
+        dino_rect.y -= movimento_y
+
     dino_rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
 
 def criar_meteoro(agora, tempo_decorrido_ms, modo="multiplayer"):
@@ -285,7 +320,7 @@ def criar_meteoro(agora, tempo_decorrido_ms, modo="multiplayer"):
         ),
         "raio": raio,
         "impacto_em": agora + tempo_alerta,
-        "finaliza_em": agora + tempo_alerta + METEORO_IMPACTO_MS,
+        "finaliza_em": agora + tempo_alerta + cfg.METEORO_IMPACTO_MS,
         "causou_dano": False,
     }
 
@@ -311,18 +346,6 @@ def desenhar_meteoros(tela, meteoros, agora):
         elif agora < meteoro["finaliza_em"]:
             for args in [((95, 55, 38), centro, raio), ((210, 78, 38), centro, raio - 10, 5), ((245, 180, 64), centro, raio // 2), ((80, 80, 82), (centro[0] - 12, centro[1] - 8), 18), ((118, 118, 120), (centro[0] + 14, centro[1] + 6), 15)]:
                 pygame.draw.circle(tela, *args)
-
-
-def desenhar_jogador_morto(tela, rect):
-    """
-    Exibe um marcador visual indicando que o jogador morreu.
-
-    Args:
-        tela (pygame.Surface): Superfície onde será desenhado.
-        rect (pygame.Rect): Área ocupada pelo jogador.
-    """
-    pygame.draw.line(tela, (180, 30, 30), (rect.left, rect.top), (rect.right, rect.bottom), 5)
-    pygame.draw.line(tela, (180, 30, 30), (rect.right, rect.top), (rect.left, rect.bottom), 5)
 
 
 def exibir_resultado_partida(tela, modo, resultado):
@@ -394,18 +417,20 @@ def executar_loop_jogo(tela, modo="singleplayer"):
     clock = pygame.time.Clock()
     fonte = pygame.font.Font("assets/fontes/fonte_pixel.ttf", 36)
 
-    animacoes_dino1 = carregar_animacoes_dino1()
-    dino_rect = pygame.Rect(0, 0, *DINO_TAMANHO)
-    dino_rect.center = (400, 200)
-    dino_direcao = "direita"
-    dino_movendo = False
-    dino_lento = False
+    jogador1 = criar_estado_jogador(
+        (400, 200),
+        (pygame.K_w, pygame.K_s, pygame.K_d, pygame.K_a),
+        cfg.CAMINHO_SPRITES_DINO1,
+    )
+    jogadores = [jogador1]
 
     if modo == "multiplayer":
-        dino2 = pygame.image.load("assets/imagens/dino2 sprites/espinossauro.png").convert_alpha()
-        dino2 = pygame.transform.flip(dino2, True, False)
-        dino2 = pygame.transform.scale(dino2, DINO_TAMANHO)
-        dino2_rect = dino2.get_rect(center=(680, 200))
+        jogador2 = criar_estado_jogador(
+            (680, 200),
+            (pygame.K_UP, pygame.K_DOWN, pygame.K_RIGHT, pygame.K_LEFT),
+            cfg.CAMINHO_SPRITES_DINO2,
+        )
+        jogadores.append(jogador2)
 
     carne = pygame.image.load("assets/imagens/MeatUI2.png").convert_alpha()
     carne = pygame.transform.scale(carne, (50, 50))
@@ -421,13 +446,7 @@ def executar_loop_jogo(tela, modo="singleplayer"):
     arvores, arbustos = criar_objetos_randomizados(areas_seguras)
     terras, flores, pedras, matinhos = criar_elementos_chao()
 
-    pontos = 0
-    pontos2 = 0
-    vivo = True
-    vivo2 = modo == "multiplayer"
     tempo_inicio = pygame.time.get_ticks()
-    tempo_morte = None
-    tempo_morte2 = None
     meteoros = []
     proximo_meteoro = fn.sortear_proximo_meteoro(tempo_inicio, 0, modo)
 
@@ -444,31 +463,30 @@ def executar_loop_jogo(tela, modo="singleplayer"):
             proximo_meteoro = fn.sortear_proximo_meteoro(agora, tempo_decorrido, modo)
 
         teclas = pygame.key.get_pressed()
-        dino_movendo = False
-        dino_lento = False
+        for jogador in jogadores:
+            jogador["movendo"] = False
+            jogador["lento"] = False
+            if not jogador["vivo"]:
+                continue
 
-        if vivo:
-            velocidade = fn.velocidade_jogador(dino_rect, arbustos)
-            dino_lento = velocidade == 2
-            mx, my = fn.movimento_teclas(teclas, velocidade, pygame.K_w, pygame.K_s, pygame.K_d, pygame.K_a)
-            dino_movendo = mx != 0 or my != 0
-            dino_direcao = "direita" if mx > 0 else "esquerda" if mx < 0 else dino_direcao
-            mover_com_colisao(dino_rect, mx, my, arvores)
-
-        if modo == "multiplayer" and vivo2:
-            mx, my = fn.movimento_teclas(teclas, fn.velocidade_jogador(dino2_rect, arbustos), pygame.K_UP, pygame.K_DOWN, pygame.K_RIGHT, pygame.K_LEFT)
-            mover_com_colisao(dino2_rect, mx, my, arvores)
+            velocidade = fn.velocidade_jogador(jogador["rect"], arbustos)
+            jogador["lento"] = velocidade == 2
+            cima, baixo, direita, esquerda = jogador["controles"]
+            mx, my = fn.movimento_teclas(teclas, velocidade, cima, baixo, direita, esquerda)
+            jogador["movendo"] = bool(mx or my)
+            if mx > 0:
+                jogador["direcao"] = "direita"
+            elif mx < 0:
+                jogador["direcao"] = "esquerda"
+            mover_com_colisao(jogador["rect"], mx, my, arvores)
 
         for meteoro in meteoros:
-            if agora >= meteoro["impacto_em"] and agora < meteoro["finaliza_em"]:
-                if not meteoro["causou_dano"]:
-                    if vivo and fn.jogador_na_area_do_meteoro(dino_rect, meteoro):
-                        vivo = False
-                        tempo_morte = agora
-                    if modo == "multiplayer" and vivo2 and fn.jogador_na_area_do_meteoro(dino2_rect, meteoro):
-                        vivo2 = False
-                        tempo_morte2 = agora
-                    meteoro["causou_dano"] = True
+            if meteoro["impacto_em"] <= agora < meteoro["finaliza_em"] and not meteoro["causou_dano"]:
+                for jogador in jogadores:
+                    if jogador["vivo"] and fn.jogador_na_area_do_meteoro(jogador["rect"], meteoro):
+                        jogador["vivo"] = False
+                        jogador["tempo_morte"] = agora
+                meteoro["causou_dano"] = True
 
         meteoros = [m for m in meteoros if agora < m["finaliza_em"]]
 
@@ -481,47 +499,40 @@ def executar_loop_jogo(tela, modo="singleplayer"):
         for arvore in arvores:
             desenhar_arvore(tela, arvore["visual"])
 
-        frame_dino = obter_frame_animacao(animacoes_dino1[escolher_animacao_dino1(vivo, dino_movendo, dino_lento)], agora, repetir=vivo, iniciado_em=tempo_morte or agora)
-        if dino_direcao == "esquerda":
-            frame_dino = pygame.transform.flip(frame_dino, True, False)
-        tela.blit(frame_dino, frame_dino.get_rect(center=dino_rect.center))
-
-        if modo == "multiplayer":
-            if vivo2:
-                tela.blit(dino2, dino2_rect)
-            else:
-                desenhar_jogador_morto(tela, dino2_rect)
+        for jogador in jogadores:
+            sprite, rect = obter_sprite_jogador(jogador, agora)
+            tela.blit(sprite, rect)
 
         for arvore in arvores:
             desenhar_arvore(tela, arvore["visual"], True)
 
-        tela.blit(fonte.render(f"P1: {pontos}" if modo == "multiplayer" else f"Pontos: {pontos}", True, (255, 255, 255)), (20, 20))
+        tela.blit(fonte.render(f"P1: {jogador1['pontos']}" if modo == "multiplayer" else f"Pontos: {jogador1['pontos']}", True, (255, 255, 255)), (20, 20))
         minutos, segundos = divmod(tempo_decorrido // 1000, 60)
         texto_tempo = fonte.render(f"{minutos:02d}:{segundos:02d}", True, (255, 255, 255))
         tela.blit(texto_tempo, texto_tempo.get_rect(center=(LARGURA_TELA // 2, 35)))
 
         if modo == "multiplayer":
-            tela.blit(fonte.render(f"P2: {pontos2}", True, (255, 255, 255)), (LARGURA_TELA - 150, 20))
+            tela.blit(fonte.render(f"P2: {jogador2['pontos']}", True, (255, 255, 255)), (LARGURA_TELA - 150, 20))
 
-        if vivo and fn.verificar_colisao(dino_rect, carne_rect):
-            pontos += 10
-            carne_rect.center = gerar_posicao_carne(arvores)
-            print(f"Pontos P1: {pontos}" if modo == "multiplayer" else f"Pontos: {pontos}")
-
-        if modo == "multiplayer" and vivo2 and fn.verificar_colisao(dino2_rect, carne_rect):
-            pontos2 += 10
-            carne_rect.center = gerar_posicao_carne(arvores)
-            print(f"Pontos P2: {pontos2}")
+        for numero, jogador in enumerate(jogadores, 1):
+            if jogador["vivo"] and jogador["rect"].colliderect(carne_rect):
+                jogador["pontos"] += 10
+                carne_rect.center = gerar_posicao_carne(arvores)
+                print(f"Pontos P{numero}: {jogador['pontos']}" if modo == "multiplayer" else f"Pontos: {jogador['pontos']}")
 
         pygame.display.update()
         clock.tick(60)
 
-        if (modo == "multiplayer" and not vivo and not vivo2) or (modo != "multiplayer" and not vivo):
-            tempo_morte, tempo_morte2 = tempo_morte or agora, tempo_morte2 or agora
-            resultado = {"p1": fn.calcular_pontuacao_final(pontos, tempo_morte - tempo_inicio)}
+        if not any(jogador["vivo"] for jogador in jogadores):
+            resultado = {"p1": fn.calcular_pontuacao_final(jogador1["pontos"], jogador1["tempo_morte"] - tempo_inicio)}
             if modo == "multiplayer":
-                resultado["p2"] = fn.calcular_pontuacao_final(pontos2, tempo_morte2 - tempo_inicio)
-                resultado["vencedor"] = "P1 venceu" if resultado["p1"] > resultado["p2"] else "P2 venceu" if resultado["p2"] > resultado["p1"] else "Empate"
+                resultado["p2"] = fn.calcular_pontuacao_final(jogador2["pontos"], jogador2["tempo_morte"] - tempo_inicio)
+                if resultado["p1"] > resultado["p2"]:
+                    resultado["vencedor"] = "P1 venceu"
+                elif resultado["p2"] > resultado["p1"]:
+                    resultado["vencedor"] = "P2 venceu"
+                else:
+                    resultado["vencedor"] = "Empate"
             return exibir_resultado_partida(tela, modo, resultado)
 
 

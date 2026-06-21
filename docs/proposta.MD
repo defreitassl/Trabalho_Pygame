@@ -169,5 +169,5 @@ Todos os itens previstos foram implementados.
 * Novos tipos de obstáculos.
 * Diferentes mapas.
 * Sistema de pausa.
-* Configurações de jogo.
+* Música e efeitos sonoros.
 * Novos personagens jogáveis.

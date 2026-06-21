@@ -13,7 +13,7 @@ Projeto final da disciplina de Introdução à Algoritmos e Programação, desen
 
 BIG BANG é um jogo de sobrevivência em que os jogadores controlam dinossauros em um ambiente pré-histórico. O objetivo é coletar pedaços de carne para aumentar a pontuação enquanto desviam de meteoros que caem aleatoriamente pelo mapa.
 
-Ao longo da partida, a dificuldade aumenta progressivamente, fazendo com que os meteoros apareçam com maior frequência e oferecendo menos tempo de reação aos jogadores.
+Ao longo da partida, a dificuldade aumenta a cada 3 segundos, fazendo com que os meteoros apareçam com maior frequência e oferecendo menos tempo de reação aos jogadores.
 
 O jogo possui dois modos:
 
@@ -31,7 +31,8 @@ A pontuação final é calculada com base em:
 
 ## Regras
 
-* Cada carne coletada concede pontos ao jogador.
+* Cada carne coletada concede 10 pontos ao jogador.
+* Cada segundo sobrevivido acrescenta 2 pontos ao resultado final.
 * Meteoros surgem aleatoriamente durante a partida.
 * Permanecer dentro da área de impacto de um meteoro elimina o jogador.
 * A dificuldade aumenta conforme o tempo passa.
@@ -79,8 +80,8 @@ BIG_BANG/
 ### Clonar o repositório
 
 ```bash
-git clone LINK_DO_REPOSITORIO
-cd BIG_BANG
+git clone https://github.com/defreitassl/Trabalho_Pygame.git
+cd Trabalho_Pygame
 ```
 
 ### Criar ambiente virtual
@@ -143,6 +144,10 @@ O projeto foi estruturado em módulos para facilitar manutenção e evolução:
 ✔ Sistema de meteoros com dificuldade progressiva
 
 ✔ Colisões com obstáculos
+
+✔ Personagens com animações de movimento e morte
+
+✔ Menu de configurações de volume e sons
 
 ✔ Testes automatizados com Pytest
 
