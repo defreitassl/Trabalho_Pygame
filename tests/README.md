@@ -4,7 +4,17 @@ Esta pasta contem testes automatizados do projeto.
 
 ## Arquivos
 
-- `test_logica.py`: valida funcoes puras de logica em `src/funcoes.py`.
+- `test_logica.py`: valida regras de `src/funcoes.py` e `src/jogo.py`.
+
+## Cobertura atual
+
+- Pontuacao por coleta e tempo sobrevivido.
+- Movimento, limites do mapa, arvores e arbustos.
+- Estados e frames das animacoes.
+- Area de dano, tamanho, intervalo e dificuldade dos meteoros.
+- Leitura e gravacao das configuracoes do menu.
+- Ativacao e volume dos efeitos sonoros.
+- Reproducao em loop da musica do menu.
 
 ## Como executar
 

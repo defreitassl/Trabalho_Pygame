@@ -4,7 +4,9 @@ Pasta destinada a sprites, fundos, icones e outros elementos visuais.
 
 ## Conteudo atual
 
-- `spritesheet.bmp`: spritesheet base do template.
+- `dino_sprites/`: frames separados das animacoes dos personagens.
+- `buttons/`: imagens dos botoes dos menus.
+- Imagens do fundo, logotipo e item coletavel.
 
 ## Recomendações
 

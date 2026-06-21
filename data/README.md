@@ -1,13 +1,11 @@
 # Dados
 
-Esta pasta guarda arquivos de persistencia simples em texto.
+Esta pasta guarda as configuracoes persistentes do jogo.
 
 ## Arquivos
 
-- `recorde.txt`: melhor pontuacao registrada.
-- `ranking.txt`: base para ranking de jogadores (opcional neste template).
-- `README.txt`: arquivo legado; manter por compatibilidade se necessario.
+- `configuracoes.json`: volume geral e estado ligado/desligado dos sons.
 
 ## Observacao
 
-Evite versionar dados pessoais reais dos jogadores.
+O menu atualiza esse arquivo sempre que uma configuracao e alterada.

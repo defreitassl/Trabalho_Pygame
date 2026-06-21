@@ -4,6 +4,8 @@ import random
 
 import pygame
 
+import src.sons as sons
+
 
 LARGURA_TELA, ALTURA_TELA = 1080, 720
 CAMINHO_CONFIGURACOES = os.path.join("data", "configuracoes.json")
@@ -25,7 +27,7 @@ CAMINHO_BOTOES = {
     "alternar_sons_desligado": os.path.join("assets", "imagens", "buttons", "turn_off_button.png"),
 }
 CONFIGURACOES_PADRAO = {"volume": 50, "sons_ligados": True}
-COR_FUNDO, COR_TEXTO, COR_TEXTO_SECUNDARIO = (8, 10, 26), (245, 245, 255), (190, 195, 220)
+COR_FUNDO, COR_TEXTO = (8, 10, 26), (245, 245, 255)
 COR_BOTAO, COR_BOTAO_HOVER, COR_BORDA = (38, 48, 92), (70, 90, 160), (130, 155, 240)
 
 
@@ -46,10 +48,6 @@ def criar_fonte_pixel(tamanho):
         fonte = pygame.font.Font(caminho_fonte, tamanho) if caminho_fonte else pygame.font.SysFont("monospace", tamanho, bold=True)
     fonte.set_bold(True)
     return fonte
-
-
-def criar_fontes_menu():
-    return {nome: criar_fonte_pixel(tam) for nome, tam in [("titulo", 64), ("titulo_medio", 42), ("texto", 28), ("botao", 24), ("texto_pequeno", 18)]}
 
 
 def desenhar_botao(tela, texto, retangulo, fonte, mouse_pos, imagem=None):
@@ -91,8 +89,7 @@ def salvar_configuracoes(configuracoes):
 
 
 def aplicar_volume(configuracoes):
-    if pygame.mixer.get_init():
-        pygame.mixer.music.set_volume(configuracoes["volume"] / 100)
+    sons.ajustar_volume_musica(configuracoes)
 
 
 def carregar_logo():
@@ -136,129 +133,34 @@ def carregar_imagens_botoes(botoes):
     return imagens
 
 
-def centro_tela():
-    return LARGURA_TELA // 2, ALTURA_TELA // 2
-
-
-def criar_botao_centralizado(y, largura=None, altura=None):
-    altura = altura or max(84, min(108, int(ALTURA_TELA * 0.15)))
-    largura = largura or int(altura * 3)
+def criar_botao_centralizado(y, largura=324, altura=108):
     return pygame.Rect((LARGURA_TELA - largura) // 2, y, largura, altura)
-
-
-def criar_layout_menu():
-    altura_botao = max(84, min(108, int(ALTURA_TELA * 0.15)))
-    espaco_botoes = int(altura_botao * 1.2)
-    primeiro_botao_y = int(ALTURA_TELA * 0.39)
-    return {
-        "titulo_y": int(ALTURA_TELA * 0.17),
-        "subtitulo_y": int(ALTURA_TELA * 0.34),
-        "primeiro_botao_y": primeiro_botao_y,
-        "segundo_botao_y": primeiro_botao_y + espaco_botoes,
-        "terceiro_botao_y": primeiro_botao_y + espaco_botoes * 2,
-        "volume_texto_y": int(ALTURA_TELA * 0.42),
-        "volume_botoes_y": int(ALTURA_TELA * 0.46),
-        "sons_texto_y": int(ALTURA_TELA * 0.60),
-        "alternar_sons_y": int(ALTURA_TELA * 0.65),
-        "voltar_configuracoes_y": int(ALTURA_TELA * 0.78),
-        "botao_altura": altura_botao,
-    }
-
-
-def criar_estrelas(quantidade=80):
-    random.seed(7)
-    return [(random.randint(0, LARGURA_TELA), random.randint(0, ALTURA_TELA), random.choice([1, 1, 1, 2]), random.randint(120, 255)) for _ in range(quantidade)]
-
-
-def desenhar_fundo_espacial(tela, estrelas):
-    tela.fill(COR_FUNDO)
-    for x, y, raio, brilho in estrelas:
-        pygame.draw.circle(tela, (brilho, brilho, brilho), (x, y), raio)
 
 
 def desenhar_background_menu(tela, background, estrelas):
     if not background:
-        desenhar_fundo_espacial(tela, estrelas)
+        tela.fill(COR_FUNDO)
+        for x, y, raio, brilho in estrelas:
+            pygame.draw.circle(tela, (brilho, brilho, brilho), (x, y), raio)
         return
     tela.blit(background, ((LARGURA_TELA - background.get_width()) // 2, (ALTURA_TELA - background.get_height()) // 2))
 
 
-def desenhar_tela_configuracoes(
-    tela,
-    fontes,
-    configuracoes,
-    botoes,
-    estrelas,
-    background,
-    imagens_botoes=None,
-):
-    mouse_pos = pygame.mouse.get_pos()
-    centro_x, _ = centro_tela()
-    layout = criar_layout_menu()
-
-    desenhar_background_menu(tela, background, estrelas)
-    for texto, fonte, y in [("CONFIGURAÇÕES", fontes["titulo_medio"], layout["titulo_y"]), (f"Volume geral: {configuracoes['volume']}%", fontes["texto"], layout["volume_texto_y"]), (f"Sons do jogo: {'Ligados' if configuracoes['sons_ligados'] else 'Desligados'}", fontes["texto"], layout["sons_texto_y"])]:
-        desenhar_texto(tela, texto, fonte, COR_TEXTO, centro_x, y)
-
-    imagem_alternar_sons = imagens_botoes.get("alternar_sons_ligado" if configuracoes["sons_ligados"] else "alternar_sons_desligado") if imagens_botoes else None
-    for texto, nome, imagem in [("-", "diminuir_volume", "diminuir_volume"), ("+", "aumentar_volume", "aumentar_volume"), ("Ligar/Desligar", "alternar_sons", None), ("Voltar", "voltar", "voltar")]:
-        desenhar_botao(tela, texto, botoes[nome], fontes["botao"], mouse_pos, imagem_alternar_sons if nome == "alternar_sons" else imagens_botoes.get(imagem) if imagens_botoes else None)
-
-
-def mostrar_configuracoes(tela):
-    relogio = pygame.time.Clock()
-    estrelas = criar_estrelas()
-    background = carregar_background_menu()
-    configuracoes = carregar_configuracoes()
-    aplicar_volume(configuracoes)
-
-    fontes = criar_fontes_menu()
-    centro_x, _ = centro_tela()
-    layout = criar_layout_menu()
-    botoes = {
-        "diminuir_volume": pygame.Rect(centro_x - 150, layout["volume_botoes_y"], 96, 72),
-        "aumentar_volume": pygame.Rect(centro_x + 54, layout["volume_botoes_y"], 96, 72),
-        "alternar_sons": criar_botao_centralizado(layout["alternar_sons_y"], 270, 90),
-        "voltar": criar_botao_centralizado(layout["voltar_configuracoes_y"], 270, 90),
-    }
-    imagens_botoes = carregar_imagens_botoes(botoes)
-
-    while True:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                salvar_configuracoes(configuracoes)
-                return "sair"
-
-            for nome, delta in [("diminuir_volume", -10), ("aumentar_volume", 10)]:
-                if verificar_clique_botao(evento, botoes[nome]):
-                    configuracoes["volume"] = max(0, min(100, configuracoes["volume"] + delta))
-                    aplicar_volume(configuracoes)
-                    salvar_configuracoes(configuracoes)
-
-            if verificar_clique_botao(evento, botoes["alternar_sons"]):
-                configuracoes["sons_ligados"] = not configuracoes["sons_ligados"]
-                salvar_configuracoes(configuracoes)
-
-            if verificar_clique_botao(evento, botoes["voltar"]):
-                salvar_configuracoes(configuracoes)
-                return "voltar"
-
-        desenhar_tela_configuracoes(tela, fontes, configuracoes, botoes, estrelas, background, imagens_botoes)
-        pygame.display.flip()
-        relogio.tick(60)
-
-
 def executar_menu(tela):
     relogio = pygame.time.Clock()
-    estrelas = criar_estrelas()
+    estrelas = [(random.randint(0, LARGURA_TELA), random.randint(0, ALTURA_TELA), random.choice([1, 1, 1, 2]), random.randint(120, 255)) for _ in range(80)]
     background = carregar_background_menu()
     logo = carregar_logo()
     configuracoes = carregar_configuracoes()
     aplicar_volume(configuracoes)
+    sons.iniciar_musica_menu(configuracoes)
     secao_atual = "principal"
-    layout = criar_layout_menu()
-
-    fontes = criar_fontes_menu()
+    layout = {
+        "titulo_y": 122, "primeiro_botao_y": 280, "segundo_botao_y": 409,
+        "terceiro_botao_y": 538, "volume_texto_y": 302, "volume_botoes_y": 331,
+        "sons_texto_y": 432, "alternar_sons_y": 468, "voltar_configuracoes_y": 561,
+    }
+    fontes = {nome: criar_fonte_pixel(tamanho) for nome, tamanho in [("titulo", 64), ("texto", 28), ("botao", 24)]}
     botoes = {
         "jogar": criar_botao_centralizado(layout["primeiro_botao_y"]),
         "configuracoes": criar_botao_centralizado(layout["segundo_botao_y"]),
@@ -279,6 +181,7 @@ def executar_menu(tela):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 salvar_configuracoes(configuracoes)
+                sons.parar_musica_menu()
                 return "sair"
 
             if secao_atual == "principal":
@@ -290,15 +193,18 @@ def executar_menu(tela):
 
                 if verificar_clique_botao(evento, botoes["sair"]):
                     salvar_configuracoes(configuracoes)
+                    sons.parar_musica_menu()
                     return "sair"
 
             elif secao_atual == "modo_jogo":
                 if verificar_clique_botao(evento, botoes["singleplayer"]):
                     salvar_configuracoes(configuracoes)
+                    sons.ajustar_volume_musica(configuracoes, durante_jogo=True)
                     return "singleplayer"
 
                 if verificar_clique_botao(evento, botoes["multiplayer"]):
                     salvar_configuracoes(configuracoes)
+                    sons.ajustar_volume_musica(configuracoes, durante_jogo=True)
                     return "multiplayer"
 
                 if verificar_clique_botao(evento, botoes["voltar_modo"]):
@@ -313,6 +219,10 @@ def executar_menu(tela):
 
                 if verificar_clique_botao(evento, botoes["alternar_sons"]):
                     configuracoes["sons_ligados"] = not configuracoes["sons_ligados"]
+                    if configuracoes["sons_ligados"]:
+                        sons.iniciar_musica_menu(configuracoes)
+                    else:
+                        sons.parar_musica_menu()
                     salvar_configuracoes(configuracoes)
 
                 if verificar_clique_botao(evento, botoes["voltar_configuracoes"]):
@@ -344,7 +254,3 @@ def executar_menu(tela):
 
         pygame.display.flip()
         relogio.tick(60)
-
-
-def mostrar_menu(tela):
-    return executar_menu(tela)
