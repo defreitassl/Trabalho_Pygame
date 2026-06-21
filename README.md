@@ -1,82 +1,149 @@
 # BIG BANG
 
-Projeto final da disciplina de Introdução a Algoritmos/Programação, desenvolvido com Python e Pygame.
+Projeto final da disciplina de Introdução à Algoritmos e Programação, desenvolvido em Python utilizando a biblioteca Pygame.
 
-## Integrantes do grupo
+## Integrantes
 
-- [Evelyn Costa](https://github.com/Evycostzocn)
-- [Douglas Freitas](https://github.com/defreitassl)
-- [João Pedro Alvarenga](https://github.com/joaopedro003)
-- [Eduardo Pêgo](https://github.com/Eduardo-Pegoz) 
+- [Evelyn Costa](https://github.com/Evycostzocn) 
+- [Douglas Freitas](https://github.com/defreitassl) 
+- [João Pedro Alvarenga](https://github.com/joaopedro003) 
+- [Eduardo Pêgo](https://github.com/Eduardo-Pegoz)
 
-## Estrutura do projeto
+## Sobre o jogo
 
-- `main.py`: ponto de entrada da aplicação.
-- `src/`: código-fonte principal do jogo (loop, regras, sprites e dados).
-- `assets/`: imagens, fontes e sons.
-- `data/`: arquivos persistentes (recorde/ranking).
-- `tests/`: testes unitários com `pytest`.
-- `docs/`: documentação do projeto, incluindo proposta inicial.
+BIG BANG é um jogo de sobrevivência em que os jogadores controlam dinossauros em um ambiente pré-histórico. O objetivo é coletar pedaços de carne para aumentar a pontuação enquanto desviam de meteoros que caem aleatoriamente pelo mapa.
 
-## Descrição do jogo
+Ao longo da partida, a dificuldade aumenta progressivamente, fazendo com que os meteoros apareçam com maior frequência e oferecendo menos tempo de reação aos jogadores.
 
-O jogo consiste em controlar um dinossauro que deve coletar pedaços de carne e desviar dos meteoros para sobreviver. O jogo possui uma relação direta entre a quantidade de carnes coletadas e o tempo de sobrevivência, fazendo com que some mais pontos. Caso ele colete uma carne podre ele perde pontos coletou pegando carnes boas.
+O jogo possui dois modos:
 
-## Objetivo do jogador
+* **Singleplayer:** um jogador enfrenta uma quantidade maior de meteoros e áreas de dano ampliadas.
+* **Multiplayer:** dois jogadores competem simultaneamente pela maior pontuação.
 
-O jogador que coletar o máximo de carnes boas possíveis ganha a partida independente do tempo que ele sobreviver.
+## Objetivo
 
-## Regras do jogo
+Sobreviver o máximo de tempo possível e acumular a maior pontuação.
 
-Principais regras do jogo.
+A pontuação final é calculada com base em:
 
-- O jogador se movimenta usando as setas do teclado e as teclas WASD.
-- Cada pedqaço de carne coletada aumenta a pontuação.
-- Colidir com um meteoro faz com que um jogador perca.
-- A partida termina quando os dois jogadores morrem.
+* Carnes coletadas durante a partida.
+* Tempo de sobrevivência.
+
+## Regras
+
+* Cada carne coletada concede pontos ao jogador.
+* Meteoros surgem aleatoriamente durante a partida.
+* Permanecer dentro da área de impacto de um meteoro elimina o jogador.
+* A dificuldade aumenta conforme o tempo passa.
+* No modo multiplayer, a partida termina quando ambos os jogadores forem eliminados.
+* Vence o jogador que obtiver a maior pontuação final.
 
 ## Controles
 
-Comando utilizados para jogar
+### Jogador 1
 
-- Seta para cima: mover para cima
-- Seta para baixo: mover para baixo
-- Seta para esquerda: mover para esquerda
-- Seta para direita: mover para direita
-- W: mover para cima
-- S: mover para baixo
-- A: mover para esquerda
-- D: mover para direita
+* W → mover para cima
+* A → mover para esquerda
+* S → mover para baixo
+* D → mover para direita
 
+### Jogador 2 (Multiplayer)
+
+* ↑ → mover para cima
+* ← → mover para esquerda
+* ↓ → mover para baixo
+* → → mover para direita
+
+## Estrutura do projeto
+
+```text
+BIG_BANG/
+│
+├── assets/      # Imagens, fontes e demais recursos
+├── docs/        # Documentação do projeto
+├── src/         # Código-fonte principal
+├── tests/       # Testes automatizados
+├── main.py      # Ponto de entrada da aplicação
+└── README.md
+```
+
+## Tecnologias utilizadas
+
+* Python 3
+* Pygame
+* Pytest
+* Git e GitHub
 
 ## Como executar o projeto
 
-### 1. Clonar o repositório
+### Clonar o repositório
 
 ```bash
 git clone LINK_DO_REPOSITORIO
-cd NOME_DA_PASTA
-python3 -m venv venv
-./venv/Scripts/activate
+cd BIG_BANG
+```
+
+### Criar ambiente virtual
+
+```bash
+python -m venv venv
+```
+
+### Ativar ambiente virtual
+
+Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+Linux/macOS:
+
+```bash
+source venv/bin/activate
+```
+
+### Instalar dependências
+
+```bash
 pip install -r requirements.txt
+```
+
+### Executar o jogo
+
+```bash
 python main.py
 ```
 
-## Como executar os testes
+## Executando os testes
 
 ```bash
-python -m pytest
+pytest
 ```
 
-## Checklist mínimo para entrega
+Atualmente o projeto possui testes automatizados utilizando Pytest para validar regras de negócio e funções auxiliares do jogo.
 
-- Preencher este README com nome final, descrição real, regras e controles do jogo.
-- Atualizar `docs/proposta.MD` com a proposta do grupo.
-- Garantir que o jogo executa com `python main.py`.
-- Garantir que os testes passam com `pytest`.
+## Organização do código
 
-## Observações para os alunos
+O projeto foi estruturado em módulos para facilitar manutenção e evolução:
 
-- Mantenham o código organizado em módulos pequenos e com responsabilidade clara.
-- Comentem partes importantes da lógica, principalmente regras do jogo.
-- Registrem decisões técnicas no README do grupo ao longo do desenvolvimento.
+* `config.py`: constantes e configurações globais.
+* `funcoes.py`: regras de negócio e cálculos do jogo.
+* `jogo.py`: loop principal, renderização e mecânicas.
+* `menu.py`: interface de navegação entre telas.
+
+## Status do projeto
+
+✔ Sistema de pontuação
+
+✔ Modo Singleplayer
+
+✔ Modo Multiplayer
+
+✔ Sistema de meteoros com dificuldade progressiva
+
+✔ Colisões com obstáculos
+
+✔ Testes automatizados com Pytest
+
+✔ Documentação com Docstrings
