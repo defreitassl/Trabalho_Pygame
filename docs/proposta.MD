@@ -1,286 +1,173 @@
-# Proposta Inicial do Jogo
+# Proposta do Projeto - BIG BANG
 
-Este documento deve ser preenchido pelo grupo na Semana 1 do projeto.
+## 1. Nome do jogo
 
-A proposta deve apresentar uma ideia simples, clara e viável para ser desenvolvida com Python e Pygame dentro do prazo disponível.
+> BIG BANG
 
-## 1. Nome provisório do jogo
-
-Escreva aqui o nome provisório do jogo.
-
-Exemplo:
-
-> Corrida dos Obstáculos
+---
 
 ## 2. Integrantes do grupo
 
-Liste os integrantes do grupo.
+- [Evelyn Costa](https://github.com/Evycostzocn) 
+- [Douglas Freitas](https://github.com/defreitassl) 
+- [João Pedro Alvarenga](https://github.com/joaopedro003) 
+- [Eduardo Pêgo](https://github.com/Eduardo-Pegoz)
 
-- Nome 1:
-- Nome 2:
-- Nome 3:
-- Nome 4:
+---
 
 ## 3. Tipo de jogo
 
-Indique o tipo de jogo que será desenvolvido.
-
-Exemplos:
-
-- jogo de desviar de obstáculos;
-- jogo de coleta de itens;
-- labirinto simples;
-- jogo de perguntas e respostas;
-- jogo de memória;
-- Pong;
-- Snake;
-- Breakout;
-- nave desviando de meteoros;
-- corrida simples com obstáculos;
-- jogo de clique rápido;
-- jogo de sobrevivência simples.
-
 Tipo escolhido pelo grupo:
 
-> Escreva aqui.
+> Jogo de sobrevivência e coleta de itens com desvio de obstáculos.
+
+---
 
 ## 4. Descrição geral do jogo
 
-Explique, em poucas linhas, como o jogo funcionará.
+BIG BANG é um jogo em que os jogadores controlam dinossauros em um cenário pré-histórico. Durante a partida, pedaços de carne aparecem pelo mapa e podem ser coletados para aumentar a pontuação.
 
-Procure responder:
+Ao mesmo tempo, meteoros caem em locais aleatórios do cenário. Os jogadores precisam evitar as áreas de impacto para sobreviver.
 
-- O que aparece na tela?
-- O que o jogador controla?
-- O que o jogador precisa fazer?
-- Quais desafios aparecem durante a partida?
+O jogo possui modos Singleplayer e Multiplayer, permitindo que um ou dois jogadores disputem a maior pontuação.
 
-Descrição:
-
-> Escreva aqui.
+---
 
 ## 5. Objetivo do jogador
 
-Explique qual é o objetivo principal do jogador.
+Sobreviver pelo maior tempo possível e coletar o máximo de carnes para obter a maior pontuação final.
 
-Exemplos:
-
-- coletar o maior número possível de itens;
-- sobreviver pelo maior tempo possível;
-- chegar até o final do labirinto;
-- acertar alvos;
-- responder perguntas corretamente;
-- evitar obstáculos;
-- quebrar todos os blocos.
-
-Objetivo:
-
-> Escreva aqui.
+---
 
 ## 6. Regras principais
 
-Liste as principais regras do jogo.
+* O jogador pode se movimentar livremente pelo mapa.
+* Cada carne coletada adiciona pontos à pontuação.
+* Meteoros aparecem em posições aleatórias durante a partida.
+* Permanecer dentro da área de impacto de um meteoro elimina o jogador.
+* A dificuldade aumenta progressivamente ao longo da partida.
 
-Exemplo:
-
-- O jogador começa com 3 vidas.
-- Cada moeda coletada vale 10 pontos.
-- Cada colisão com obstáculo remove 1 vida.
-- A partida termina quando as vidas chegam a zero.
-- O jogador vence se alcançar 100 pontos.
-
-Regras do grupo:
-
-- Regra 1:
-- Regra 2:
-- Regra 3:
-- Regra 4:
-- Regra 5:
+---
 
 ## 7. Condição de vitória
 
-Explique como o jogador vence ou conclui o jogo.
+### Singleplayer
 
-Exemplos:
+O objetivo é alcançar a maior pontuação possível antes de ser eliminado.
 
-- atingir determinada pontuação;
-- chegar ao final da fase;
-- sobreviver até o tempo acabar;
-- responder uma quantidade mínima de perguntas;
-- quebrar todos os blocos.
+### Multiplayer
 
-Condição de vitória:
+Vence o jogador que obtiver a maior pontuação final após a eliminação dos dois participantes.
 
-> Escreva aqui.
+---
 
 ## 8. Condição de derrota ou encerramento
 
-Explique como o jogador perde ou quando a partida termina.
+### Singleplayer
 
-Exemplos:
+A partida termina quando o jogador é atingido por um meteoro.
 
-- perder todas as vidas;
-- acabar o tempo;
-- colidir com determinado obstáculo;
-- errar muitas perguntas;
-- deixar a bola cair, no caso de Breakout ou Pong.
+### Multiplayer
 
-Condição de derrota ou encerramento:
+A partida termina quando ambos os jogadores forem eliminados.
 
-> Escreva aqui.
+---
 
-## 9. Elementos previstos no jogo
+## 9. Elementos presentes no jogo
 
-Descreva os principais elementos que farão parte do jogo.
+### Jogador
 
-## Jogador ou elemento principal
+Dinossauros controlados pelo teclado que podem se movimentar pelo cenário para coletar carnes e evitar perigos.
 
-Exemplo:
+### Obstáculos e desafios
 
-> Um personagem controlado pelas setas do teclado.
+* Meteoros com área de impacto.
+* Árvores que bloqueiam a movimentação.
+* Arbustos que reduzem a velocidade dos jogadores.
 
-Descrição:
+### Objetos de interação
 
-> Escreva aqui.
+* Carnes coletáveis espalhadas pelo mapa.
 
-## Obstáculos, inimigos ou desafios
+### Sistema de pontuação
 
-Exemplo:
+A pontuação final é composta por:
 
-> Obstáculos aparecem em posições aleatórias e devem ser evitados.
+* Pontos obtidos ao coletar carnes.
+* Bônus baseado no tempo de sobrevivência.
 
-Descrição:
+---
 
-> Escreva aqui.
+## 10. Controles
 
-## Itens, alvos ou objetos de interação
+### Jogador 1
 
-Exemplo:
+* W → mover para cima
+* A → mover para esquerda
+* S → mover para baixo
+* D → mover para direita
 
-> Moedas aparecem na tela e aumentam a pontuação quando coletadas.
+### Jogador 2 (Multiplayer)
 
-Descrição:
+* ↑ → mover para cima
+* ← → mover para esquerda
+* ↓ → mover para baixo
+* → → mover para direita
 
-> Escreva aqui.
+---
 
-## Pontuação, vidas, tempo ou progresso
+## 11. Organização do código
 
-Exemplo:
+* `main.py`: ponto de entrada do jogo.
+* `src/jogo.py`: loop principal e mecânicas do jogo.
+* `src/menu.py`: menu principal.
+* `src/funcoes.py`: funções auxiliares e regras de negócio.
+* `src/config.py`: constantes e configurações globais.
+* `tests/test_logica.py`: testes automatizados com Pytest.
 
-> O jogador começa com 3 vidas e ganha 10 pontos por item coletado.
+---
 
-Descrição:
+## 12. Recursos externos utilizados
 
-> Escreva aqui.
+* Biblioteca Pygame.
+* Sprites de dinossauros.
+* Fonte pixel personalizada.
+* Recursos gráficos utilizados para compor o cenário.
 
-## 10. Controles previstos
+---
 
-Informe os comandos que serão utilizados pelo jogador.
+## 13. Principais dificuldades encontradas
 
-Exemplo:
+* Implementação da colisão entre jogadores e obstáculos.
+* Sistema de meteoros com dificuldade progressiva.
+* Organização do projeto em múltiplos módulos.
+* Configuração do Pytest para testes automatizados.
+* Controle de animações dos personagens.
+* Integração e gerenciamento do projeto utilizando Git e GitHub.
 
-- Seta para cima: mover para cima
-- Seta para baixo: mover para baixo
-- Seta para esquerda: mover para esquerda
-- Seta para direita: mover para direita
-- Espaço: realizar ação
-- ESC: sair do jogo
+---
 
-Controles do grupo:
+## 14. Escopo mínimo definido
 
-- Tecla/comando:
-- Tecla/comando:
-- Tecla/comando:
+A versão mínima do jogo deveria conter:
 
-## 11. Organização inicial do código
+* Movimentação dos jogadores.
+* Sistema de pontuação.
+* Coleta de carnes.
+* Obstáculos.
+* Sistema de derrota.
+* Tela de fim de jogo.
 
-Explique como o grupo pretende organizar o código.
+Todos os itens previstos foram implementados.
 
-Exemplo:
+---
 
-- `main.py`: inicia o jogo;
-- `src/jogo.py`: contém o loop principal;
-- `src/config.py`: guarda configurações como tamanho da tela e cores;
-- `src/funcoes.py`: contém funções auxiliares;
-- `src/dados.py`: contém funções de leitura e escrita de arquivos.
+## 15. Melhorias futuras
 
-Organização planejada:
-
-> Escreva aqui.
-
-
-## 12. Recursos externos previstos
-
-Informe se o grupo pretende utilizar imagens, sons, fontes, tutoriais ou códigos externos.
-
-Exemplo:
-
-- imagens obtidas de banco gratuito;
-- sons gratuitos;
-- tutorial usado apenas como referência;
-- fonte personalizada.
-
-Recursos previstos:
-
-> Escreva aqui.
-
-Caso não pretenda utilizar recursos externos, escreva:
-
-> Não pretendemos utilizar recursos externos.
-
-## 13. Principais dificuldades esperadas
-
-Liste as dificuldades que o grupo acredita que poderá enfrentar.
-
-Exemplos:
-
-- movimentação do jogador;
-- colisão entre objetos;
-- controle de tempo;
-- criação do ranking;
-- organização do código;
-- uso do GitHub;
-- testes;
-- exibição de textos na tela.
-
-Dificuldades previstas:
-
-- Dificuldade 1:
-- Dificuldade 2:
-- Dificuldade 3:
-
-## 14. Escopo mínimo para a entrega final
-
-Descreva qual será a versão mínima aceitável do jogo.
-
-Esta seção é importante para evitar que o grupo escolha uma ideia grande demais.
-
-Exemplo:
-
-> A versão mínima do jogo terá um personagem controlado pelo teclado, obstáculos aparecendo na tela, sistema de vidas, sistema de pontuação e tela de fim de jogo.
-
-Escopo mínimo:
-
-> Escreva aqui.
-
-## 15. Possíveis melhorias, caso haja tempo
-
-Liste funcionalidades extras que o grupo poderá implementar se conseguir concluir o escopo mínimo.
-
-Exemplos:
-
-- tela inicial;
-- sons;
-- fases;
-- aumento de dificuldade;
-- ranking;
-- animações;
-- novos tipos de obstáculos;
-- diferentes personagens;
-- menu de pausa.
-
-Melhorias possíveis:
-
-- Melhoria 1:
-- Melhoria 2:
-- Melhoria 3:
+* Sistema de ranking.
+* Power-ups temporários.
+* Novos tipos de obstáculos.
+* Diferentes mapas.
+* Sistema de pausa.
+* Configurações de jogo.
+* Novos personagens jogáveis.
