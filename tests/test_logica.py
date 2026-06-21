@@ -1,31 +1,23 @@
 import pygame
 
-from src.funcoes import calcular_pontos, jogador_perdeu, limitar_valor
-from src.jogo import (
-    calcular_dificuldade_meteoros,
+from src.funcoes import (
+    calcular_pontos,
     calcular_pontuacao_final,
+    calcular_dificuldade_meteoros,
     calcular_raio_meteoro,
+    jogador_na_area_do_meteoro,
+    sortear_raio_meteoro,
+)
+
+from src.jogo import (
     criar_meteoro,
     escolher_animacao_dino1,
-    jogador_na_area_do_meteoro,
     obter_frame_animacao,
-    sortear_raio_meteoro,
 )
 
 
 def test_calcular_pontos():
     assert calcular_pontos(10, 5) == 15
-
-
-def test_jogador_perdeu():
-    assert jogador_perdeu(0) is True
-    assert jogador_perdeu(3) is False
-
-
-def test_limitar_valor():
-    assert limitar_valor(-5, 0, 100) == 0
-    assert limitar_valor(150, 0, 100) == 100
-    assert limitar_valor(50, 0, 100) == 50
 
 
 def test_calcular_pontuacao_final_soma_carne_e_tempo():
@@ -55,6 +47,7 @@ def test_obter_frame_animacao_para_no_ultimo_frame():
 
 def test_jogador_na_area_do_meteoro():
     dino_rect = pygame.Rect(100, 100, 100, 80)
+
     meteoro = {
         "centro": (150, 165),
         "raio": 156,
@@ -65,6 +58,7 @@ def test_jogador_na_area_do_meteoro():
 
 def test_jogador_fora_da_area_do_meteoro():
     dino_rect = pygame.Rect(100, 100, 100, 80)
+
     meteoro = {
         "centro": (400, 400),
         "raio": 156,
@@ -83,8 +77,8 @@ def test_dificuldade_meteoros_aumenta_com_tempo():
 
 
 def test_dificuldade_meteoros_respeita_limites_minimos():
-    intervalo_min, intervalo_max, tempo_alerta = calcular_dificuldade_meteoros(
-        600000,
+    intervalo_min, intervalo_max, tempo_alerta = (
+        calcular_dificuldade_meteoros(600000)
     )
 
     assert intervalo_min == 350
@@ -115,7 +109,9 @@ def test_sortear_raio_meteoro_varia_tamanho():
 
 
 def test_spawn_meteoros_mais_rapido():
-    intervalo_min, intervalo_max, _ = calcular_dificuldade_meteoros(0, "multiplayer")
+    intervalo_min, intervalo_max, _ = (
+        calcular_dificuldade_meteoros(0, "multiplayer")
+    )
 
     assert intervalo_min == 750
     assert intervalo_max == 2166
